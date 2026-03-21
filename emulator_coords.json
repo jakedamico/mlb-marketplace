@@ -1,0 +1,185 @@
+{
+  "BTN_MARKETPLACE": [
+    -631,
+    1864
+  ],
+  "BTN_PROFILE": [
+    -87,
+    1867
+  ],
+  "BTN_ORDERS": [
+    -544,
+    1157
+  ],
+  "BTN_SELL_ORDERS_TAB": [
+    -810,
+    216
+  ],
+  "BTN_SEARCH_CLEAR": [
+    -69,
+    323
+  ],
+  "BTN_SEARCH_INPUT": [
+    -633,
+    332
+  ],
+  "BTN_MKT_FILTER_OPEN": [
+    -217,
+    454
+  ],
+  "BTN_MKT_FILTER_RARITY": [
+    -374,
+    552
+  ],
+  "BTN_MKT_FILTER_DROPDOWN": [
+    -373,
+    642
+  ],
+  "BTN_MKT_FILTER_GOLD": [
+    -406,
+    557
+  ],
+  "BTN_MKT_FILTER_SILVER": [
+    -407,
+    642
+  ],
+  "BTN_MKT_FILTER_CLOSE_RARITY": [
+    -400,
+    549
+  ],
+  "BTN_MKT_FILTER_SHOW": [
+    -423,
+    309
+  ],
+  "RESULT_BOX_1_TL": [
+    -902,
+    661
+  ],
+  "RESULT_BOX_1_BR": [
+    -609,
+    697
+  ],
+  "RESULT_BOX_2_TL": [
+    -903,
+    952
+  ],
+  "RESULT_BOX_2_BR": [
+    -609,
+    996
+  ],
+  "RESULT_BOX_3_TL": [
+    -905,
+    1240
+  ],
+  "RESULT_BOX_3_BR": [
+    -570,
+    1292
+  ],
+  "RESULT_BOX_4_TL": [
+    -904,
+    1532
+  ],
+  "RESULT_BOX_4_BR": [
+    -577,
+    1582
+  ],
+  "BTN_MENU": [
+    -78,
+    1740
+  ],
+  "BTN_BUY_ORDER": [
+    -301,
+    1438
+  ],
+  "BTN_PRICE_INPUT": [
+    -790,
+    962
+  ],
+  "BTN_FINALIZE": [
+    -279,
+    960
+  ],
+  "BTN_CLOSE_DIALOG": [
+    -1009,
+    460
+  ],
+  "BTN_CLOSE_CARD": [
+    -1030,
+    93
+  ],
+  "BTN_SELL_TAB": [
+    -651,
+    864
+  ],
+  "BTN_INVENTORY": [
+    -548,
+    843
+  ],
+  "BTN_FILTER_OPEN": [
+    -99,
+    188
+  ],
+  "BTN_FILTER_RARITY": [
+    -352,
+    561
+  ],
+  "BTN_FILTER_DROPDOWN": [
+    -384,
+    652
+  ],
+  "BTN_FILTER_SILVER": [
+    -405,
+    911
+  ],
+  "BTN_FILTER_SHOW": [
+    -427,
+    236
+  ],
+  "SLOT1_CLICK": [
+    -810,
+    600
+  ],
+  "SLOT2_CLICK": [
+    -242,
+    612
+  ],
+  "SLOT1_EMPTY_CHECK": [
+    -808,
+    604
+  ],
+  "SLOT2_EMPTY_CHECK": [
+    -254,
+    615
+  ],
+  "ORDER_CHECK_POS": [
+    -122,
+    508
+  ],
+  "BTN_CANCEL_ORDER": [
+    -118,
+    491
+  ],
+  "BTN_CONFIRM_CANCEL": [
+    -371,
+    1084
+  ],
+"STUBS_BOX_TL": [-128, 178],
+"STUBS_BOX_BR": [-35, 212],
+  "CARD_NAME_BOX_TL": [
+    -957,
+    69
+  ],
+"CARD_NAME_BOX_BR": [-580, 124],
+  "SWIPE_START": [
+    -536,
+    422
+  ],
+  "SLOT1_UNSELLABLE_CHECK": [-936, 451],
+  "SWIPE_END": [
+    -538,
+    931
+  ],
+  "BTN_MKT_GOLD_FROM_SILVER": [-409, 555],
+"BTN_MKT_SILVER_FROM_GOLD": [-403, 732],
+"BTN_FILTER_GOLD": [-412, 825]
+}

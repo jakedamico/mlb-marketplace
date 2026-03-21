@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta content="The Show, MLB 21, MLB 22, MLB 23, MLB 24" name="keywords"/>
+    <meta content="The Show is where you talk about MLB The Show!" name="description"/>
+    <meta content="no-cache" name="turbolinks-cache-control"/>
+    <title>
+      Home - The Show Account
+    </title>
+    <meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="6Ks4W9kghM0hIegYWep8o59QkwmlfnOqX09ZwrhxE9GQbKO78_0oHc-lFixjNURM1XYUdldzvHxvPxoMMM-LcQ" />
+    
+    <link rel="stylesheet" href="/assets/application-552a59dcf4cca3c4fc9869daf06ae8dc26f567dfdef8be61e5ea8ab42785a33a.css" media="all" data-turbolinks-track="reload" />
+    <link rel="stylesheet" href="/assets/tailwind-7c1ad6c29cd184068d826d22e202aac6b1044aa7c82e3c57606cbfb3cbae2418.css" data-turbo-track="reload" />
+<link rel="stylesheet" href="/assets/inter-font-b09c62c2a5577703b8b6c61fe76b6169c89d746dbe28f44da83161702a0d90ef.css" data-turbo-track="reload" />
+    <script src="/assets/application-192582b93f5e5d7cc7882ba7580e606a34169f43aceb5efffc6ba879486b55c9.js" data-turbolinks-track="reload"></script>
+    <link href="/assets/shared/favicon-66530c47d317b448bdb02a660175ccbaa2b118d5f0f047e1f5dfc3f90e66f3c2.jpg" rel="shortcut icon" type="image/jpg">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,700,700i,900,900i&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Teko:500&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" rel="stylesheet">
+    <noscript>
+  You must have Javascript enabled to view this content.
+</noscript>
+
+    <script>
+  toastr.options = {
+    "positionClass": 'toast-top-full-width',
+    "timeOut": '5000',
+    "target": 'body'
+  };
+</script>
+
+    <script async='async' src='https://www.googletagmanager.com/gtag/js?id=G-EJKYYHZPBF'></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  
+  gtag('config', 'G-EJKYYHZPBF', {
+    'page_title' : 'Home - The Show Account',
+    'page_path': "/"
+  });
+</script>
+
+  </head>
+  <body class="antialiased">
+    
+<div class="spinner">
+  <div class="ts-loading-container">
+    <img alt="Fetching new items..." src="/assets/shared/loading-icon-334e4a81f1128e612f7d8e0e77b53b905b8a16842f39d7785391d52df9fb490f.gif"/>
+  </div>
+</div>
+
+    
+    <div class="global-header">
+  <div class="global-header-inner">
+    <a id="theshow-link" href="https://theshow.com">THESHOW.COM</a>
+    <div class="global-menu-survey">
+      <div class="global-menu-survey-wrapper">
+        <svg class="global-toggle-survey" height="8" viewbox="0 0 8 8" width="8" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0v7h7v-3.59l-1 1v1.59h-5v-5h3.59l1-1h-5.59zm7 0l-3 3-1-1-1 1 2 2 4-4-1-1z"></path>
+        </svg>
+        <div class="global-menu-survey-label">
+          New Survey
+        </div>
+      </div>
+    </div>
+    <div class="global-header-links-right">
+      <a class="svg" href="https://mlb26.theshow.com/dashboard" aria-label="Game">
+        <svg class="link-icon" height="12" viewbox="0 0 512 512" width="12" xmlns="http://www.w3.org/2000/svg">
+          <title>Game</title>
+          <path d="M368.5 363.9l28.8-13.9c11.1 22.9 26 43.2 44.1 60.9 34-42.5 54.5-96.3 54.5-154.9 0-58.5-20.4-112.2-54.2-154.6-17.8 17.3-32.6 37.1-43.6 59.5l-28.7-14.1c12.8-26 30-49 50.8-69C375.6 34.7 315 8 248 8 181.1 8 120.5 34.6 75.9 77.7c20.7 19.9 37.9 42.9 50.7 68.8l-28.7 14.1c-11-22.3-25.7-42.1-43.5-59.4C20.4 143.7 0 197.4 0 256c0 58.6 20.4 112.3 54.4 154.7 18.2-17.7 33.2-38 44.3-61l28.8 13.9c-12.9 26.7-30.3 50.3-51.5 70.7 44.5 43.1 105.1 69.7 172 69.7 66.8 0 127.3-26.5 171.9-69.5-21.1-20.4-38.5-43.9-51.4-70.6zm-228.3-32l-30.5-9.8c14.9-46.4 12.7-93.8-.6-134l30.4-10c15 45.6 18 99.9.7 153.8zm216.3-153.4l30.4 10c-13.2 40.1-15.5 87.5-.6 134l-30.5 9.8c-17.3-54-14.3-108.3.7-153.8z"></path>
+        </svg>
+      </a>
+      <a class="link-text" alt="Game" href="https://mlb26.theshow.com/dashboard">Game</a>
+      <a class="svg" href="https://theshow.sonysandiegostudio.games/hc/en-us" aria-label="Support">
+        <svg class="link-icon" height="12" viewbox="0 0 512 512" width="12" xmlns="http://www.w3.org/2000/svg">
+          <title>Support</title>
+          <path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.052-72.421 68.084-72.421 92.863V300c0 6.627-5.373 12-12 12h-45.647c-6.627 0-12-5.373-12-12v-8.659c0-35.745 27.1-50.034 47.579-61.516 17.561-9.845 28.324-16.541 28.324-29.579 0-17.246-21.999-28.693-39.784-28.693-23.189 0-33.894 10.977-48.942 29.969-4.057 5.12-11.46 6.071-16.666 2.124l-27.824-21.098c-5.107-3.872-6.251-11.066-2.644-16.363C184.846 131.491 214.94 112 261.794 112c49.071 0 101.45 38.304 101.45 88.8zM298 368c0 23.159-18.841 42-42 42s-42-18.841-42-42 18.841-42 42-42 42 18.841 42 42z"></path>
+        </svg>
+      </a>
+      <a class="link-text" alt="Support" href="https://theshow.sonysandiegostudio.games/hc/en-us">Support</a>
+      <a class="svg" href="https://account.theshow.com/dashboard" aria-label="My Account">
+        <svg class="link-icon" height="12" viewbox="0 0 496 512" width="12" xmlns="http://www.w3.org/2000/svg">
+          <title>My Account</title>
+          <path d="M248 104c-53 0-96 43-96 96s43 96 96 96 96-43 96-96-43-96-96-96zm0 144c-26.5 0-48-21.5-48-48s21.5-48 48-48 48 21.5 48 48-21.5 48-48 48zm0-240C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm0 448c-49.7 0-95.1-18.3-130.1-48.4 14.9-23 40.4-38.6 69.6-39.5 20.8 6.4 40.6 9.6 60.5 9.6s39.7-3.1 60.5-9.6c29.2 1 54.7 16.5 69.6 39.5-35 30.1-80.4 48.4-130.1 48.4zm162.7-84.1c-24.4-31.4-62.1-51.9-105.1-51.9-10.2 0-26 9.6-57.6 9.6-31.5 0-47.4-9.6-57.6-9.6-42.9 0-80.6 20.5-105.1 51.9C61.9 339.2 48 299.2 48 256c0-110.3 89.7-200 200-200s200 89.7 200 200c0 43.2-13.9 83.2-37.3 115.9z"></path>
+        </svg>
+      </a>
+      <a class="link-text" alt="My Account" href="https://account.theshow.com/dashboard">My Account</a>
+    </div>
+  </div>
+</div>
+
+<div class='global-modal' id='global-surveys'>
+<div class='global-modal-background'></div>
+<div class='global-modal-content'>
+<div class='global-box'>
+</div>
+<button aria-label='close' class='global-modal-close'></button>
+</div>
+</div>
+<script>
+  function TheShowAlertToggle() {
+    $(".dismiss-alert").on("click", function(e) {
+      var el = $(this).data('id')
+  
+      e.preventDefault();
+  
+      $.ajax({
+        type: "GET",
+        url: "https://api.theshow.com/alerts/dismiss_alert.json",
+        dataType: "json",
+        data:{
+          id: el
+        },
+        crossDomain: true,
+        xhrFields: {
+          withCredentials: true
+        },
+        success: function(data) {
+          if (data["success"] == "OK") {
+            $("#alert-"+el+"").remove();
+          }
+        }
+      });
+    });
+  }
+  
+  function TheShowWonSweepstakesToggle() {
+    $("#won-sweepstakes-toggle").on("click", function(e) {
+      e.preventDefault();
+  
+      $.ajax({
+        type: "GET",
+        url: "https://api.theshow.com/sweepstakes/dismiss_won_sweepstakes.json",
+        dataType: "json",
+        crossDomain: true,
+        xhrFields: {
+          withCredentials: true
+        },
+        success: function(data) {
+          if (data["success"] == "OK") {
+            $(".global-sweepstakes").remove();
+          }
+        }
+      });
+    });
+  }
+  
+  function TheShowRibbonToggle() {
+    $("#ribbon-toggle").on("click", function(e) {
+      e.preventDefault();
+  
+      $.ajax({
+        type: "GET",
+        url: "https://api.theshow.com/ribbons/dismiss_ribbon.json",
+        dataType: "json",
+        crossDomain: true,
+        xhrFields: {
+          withCredentials: true
+        },
+        success: function(data) {
+          if (data["success"] == "OK") {
+            $(".fixed-ribbon").remove();
+          }
+        }
+      });
+    });
+  }
+  
+  function TheShow21WonChallengeToggle() {
+    $("#mlb21-won-challenge-toggle").on("click", function(e) {
+      e.preventDefault();
+  
+      $.ajax({
+        type: "GET",
+        url: "https://api.theshow.com/challenges/mlb21_dismiss_won_challenge.json",
+        dataType: "json",
+        crossDomain: true,
+        xhrFields: {
+          withCredentials: true
+        },
+        success: function(data) {
+          if (data["success"] == "OK") {
+            $(".mlb21-global-challenge").remove();
+          }
+        }
+      });
+    });
+  }
+  
+  function TheShow22WonChallengeToggle() {
+    $("#mlb22-won-challenge-toggle").on("click", function(e) {
+      e.preventDefault();
+  
+      $.ajax({
+        type: "GET",
+        url: "https://api.theshow.com/challenges/mlb22_dismiss_won_challenge.json",
+        dataType: "json",
+        crossDomain: true,
+        xhrFields: {
+          withCredentials: true
+        },
+        success: function(data) {
+          if (data["success"] == "OK") {
+            $(".mlb22-global-challenge").remove();
+          }
+        }
+      });
+    });
+  }
+  
+  function TheShow23WonChallengeToggle() {
+    $("#mlb23-won-challenge-toggle").on("click", function(e) {
+      e.preventDefault();
+  
+      $.ajax({
+        type: "GET",
+        url: "https://api.theshow.com/challenges/mlb23_dismiss_won_challenge.json",
+        dataType: "json",
+        crossDomain: true,
+        xhrFields: {
+          withCredentials: true
+        },
+        success: function(data) {
+          if (data["success"] == "OK") {
+            $(".mlb23-global-challenge").remove();
+          }
+        }
+      });
+    });
+  }
+  
+  function TheShow24WonChallengeToggle() {
+    $("#mlb24-won-challenge-toggle").on("click", function(e) {
+      e.preventDefault();
+  
+      $.ajax({
+        type: "GET",
+        url: "https://api.theshow.com/challenges/mlb24_dismiss_won_challenge.json",
+        dataType: "json",
+        crossDomain: true,
+        xhrFields: {
+          withCredentials: true
+        },
+        success: function(data) {
+          if (data["success"] == "OK") {
+            $(".mlb24-global-challenge").remove();
+          }
+        }
+      });
+    });
+  }
+  
+  function TheShow25WonChallengeToggle() {
+    $("#mlb25-won-challenge-toggle").on("click", function(e) {
+      e.preventDefault();
+  
+      $.ajax({
+        type: "GET",
+        url: "https://api.theshow.com/challenges/mlb25_dismiss_won_challenge.json",
+        dataType: "json",
+        crossDomain: true,
+        xhrFields: {
+          withCredentials: true
+        },
+        success: function(data) {
+          if (data["success"] == "OK") {
+            $(".mlb25-global-challenge").remove();
+          }
+        }
+      });
+    });
+  }
+  
+  function TheShow26WonChallengeToggle() {
+    $("#mlb26-won-challenge-toggle").on("click", function(e) {
+      e.preventDefault();
+  
+      $.ajax({
+        type: "GET",
+        url: "https://api.theshow.com/challenges/mlb26_dismiss_won_challenge.json",
+        dataType: "json",
+        crossDomain: true,
+        xhrFields: {
+          withCredentials: true
+        },
+        success: function(data) {
+          if (data["success"] == "OK") {
+            $(".mlb26-global-challenge").remove();
+          }
+        }
+      });
+    });
+  }
+  
+  TheShowAlertToggle();
+  TheShowWonSweepstakesToggle();
+  TheShowRibbonToggle();
+  TheShow21WonChallengeToggle();
+  TheShow22WonChallengeToggle();
+  TheShow23WonChallengeToggle();
+  TheShow24WonChallengeToggle();
+  TheShow25WonChallengeToggle();
+  TheShow26WonChallengeToggle();
+</script>
+
+<div class="ts-mlb26">
+  <div class="min-h-screen p-6 text-white ts-background">
+    <div class="m-auto md:w-[calc(500px)]">
+      <img alt="The Show" class="max-w-[360px] m-auto mb-8 mt-8" src="/assets/shared/mlb-logo-white-4d78ff5e01ad4fa707b2af410709bb4486aeab0cf8e6c85d2dc495ff3e7d0078.png">
+      <div class="mb-4 ts-alert-neutral">
+        <div>
+          <p class="font-bold">
+            Account Linking:
+          </p>
+          <p>
+            <p>Logging into your MLBTS account first will grant you access to linking other console or third party accounts.</p><p>Don't have an account? Create one <a class='underline' href='/mlbts_account/new''>here</a>.</p>
+          </p>
+        </div>
+      </div>
+      <div class="p-6 rounded-lg bg-ts24-800">
+          <div class="flex items-center mb-2 border border-ts24-950">
+            <a class="text-white hover:no-underline" href="https://account.theshow.com/mlbts_account/login?ref=account">
+              <img alt="The Show" class="max-w-[64px] mr-4 inline-block" src="/assets/shared/mlbts-6f2f37ce39fb1dbf3c3243f5199cae8e4884c7a6b947d92adfde4a06a04ec0f5.jpg"/>
+              <div class="inline-block">The Show</div>
+            </a>
+          </div>
+        <div class="flex items-center mb-2 border border-ts24-950">
+          <a class="text-white hover:no-underline" href="https://account.theshow.com/psn_sessions/login?ref=account">
+            <img alt="PlayStation&amp;reg;" class="max-w-[64px] mr-4 inline-block" src="/assets/shared/playstation-2aa9434460f14ca24ce452a400d9c355923f79325f7fbb3f0cd60107235545a0.jpg"/>
+            <div class="inline-block">PlayStation&reg;</div>
+          </a>
+        </div>
+        <div class="flex items-center mb-2 border border-ts24-950">
+          <a class="text-white hover:no-underline" href="https://account.theshow.com/xbl_sessions/login?ref=account">
+            <img alt="Xbox&amp;reg;" class="max-w-[64px] mr-4 inline-block" src="/assets/shared/xbox-b56a8f89fde8fd37a181b1eefc66b9132bc4416d985e383d5fd492a11b85646c.jpg"/>
+            <div class="inline-block">Xbox&reg;</div>
+          </a>
+        </div>
+          <div class="flex items-center mb-2 border border-ts24-950">
+            <a class="text-white hover:no-underline" href="https://account.theshow.com/nsw_sessions/login?ref=account">
+              <img alt="Nintendo&amp;reg;" class="max-w-[64px] mr-4 inline-block" src="/assets/shared/nintendo-f241d0e99508555f0f0130bf4389dc0dac8e05662943105e43d25a2777770339.jpg"/>
+              <div class="inline-block">Nintendo&reg;</div>
+            </a>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+  <footer>
+    <div class="footer-container">
+      <div class="footer-inner">
+        <div class="footer-links">
+          <div class="footer-social">
+            <a href="https://twitter.com/MLBTheShow" target="_blank" aria-label="X">
+              <svg viewbox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                <title>Twitter</title>
+                <path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"></path>
+              </svg>
+            </a>
+            <a href="https://www.instagram.com/MLBTheShow/" target="_blank" aria-label="Instagram">
+              <svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+                <title>Instagram</title>
+                <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"></path>
+              </svg>
+            </a>
+            <a href="https://www.facebook.com/mlbtheshow/" target="_blank" aria-label="Facebook">
+              <svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+                <title>Facebook</title>
+                <path d="M400 32H48A48 48 0 0 0 0 80v352a48 48 0 0 0 48 48h137.25V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.27c-30.81 0-40.42 19.12-40.42 38.73V256h68.78l-11 71.69h-57.78V480H400a48 48 0 0 0 48-48V80a48 48 0 0 0-48-48z"></path>
+              </svg>
+            </a>
+            <a href="https://www.youtube.com/channel/UC9N9mZrlPKIjvPH_9fI20jQ" target="_blank" aria-label="YouTube">
+              <svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <title>YouTube</title>
+                <path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"></path>
+              </svg>
+            </a>
+            <a href="https://www.twitch.tv/sonysandiegostudio" target="_blank" aria-label="Twitch">
+              <svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+                <title>Twitch</title>
+                <path d="M40.1 32L10 108.9v314.3h107V480h60.2l56.8-56.8h87l117-117V32H40.1zm357.8 254.1L331 353H224l-56.8 56.8V353H76.9V72.1h321v214zM331 149v116.9h-40.1V149H331zm-107 0v116.9h-40.1V149H224z"></path>
+              </svg>
+            </a>
+            <a href="https://discord.gg/mlbtheshow" target="_blank" aria-label="Discord">
+              <svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+                <title>Discord</title>
+                <path d="M297.216 243.2c0 15.616-11.52 28.416-26.112 28.416-14.336 0-26.112-12.8-26.112-28.416s11.52-28.416 26.112-28.416c14.592 0 26.112 12.8 26.112 28.416zm-119.552-28.416c-14.592 0-26.112 12.8-26.112 28.416s11.776 28.416 26.112 28.416c14.592 0 26.112-12.8 26.112-28.416.256-15.616-11.52-28.416-26.112-28.416zM448 52.736V512c-64.494-56.994-43.868-38.128-118.784-107.776l13.568 47.36H52.48C23.552 451.584 0 428.032 0 398.848V52.736C0 23.552 23.552 0 52.48 0h343.04C424.448 0 448 23.552 448 52.736zm-72.96 242.688c0-82.432-36.864-149.248-36.864-149.248-36.864-27.648-71.936-26.88-71.936-26.88l-3.584 4.096c43.52 13.312 63.744 32.512 63.744 32.512-60.811-33.329-132.244-33.335-191.232-7.424-9.472 4.352-15.104 7.424-15.104 7.424s21.248-20.224 67.328-33.536l-2.56-3.072s-35.072-.768-71.936 26.88c0 0-36.864 66.816-36.864 149.248 0 0 21.504 37.12 78.08 38.912 0 0 9.472-11.52 17.152-21.248-32.512-9.728-44.8-30.208-44.8-30.208 3.766 2.636 9.976 6.053 10.496 6.4 43.21 24.198 104.588 32.126 159.744 8.96 8.96-3.328 18.944-8.192 29.44-15.104 0 0-12.8 20.992-46.336 30.464 7.68 9.728 16.896 20.736 16.896 20.736 56.576-1.792 78.336-38.912 78.336-38.912z"></path>
+              </svg>
+            </a>
+            <a href="https://www.tiktok.com/@mlbtheshow?lang=en" target="_blank" aria-label="TikTok">
+              <svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+                <title>TikTok</title>
+                <path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"></path>
+              </svg>
+            </a>
+          </div>
+          <div class="footer-icons">
+            <img alt="MLB Players Association" class="mlbpa" src="/assets/shared/mlbpa-71ab8e907759cf29eb742dbc50d25f661c7f22aaac7b5945ecabb8b2a9b00978.png"/>
+            <img alt="Major League Baseball" class="mlb" src="/assets/shared/mlb-bd839221b4573b9c222c2f420eb2e6c01cfa5764228f3cec84204087f323732d.png"/>
+            <img alt="Sony Interactive Entertainment" class="sie" src="/assets/shared/sie-d786317d3916631ac991cfd5191adb9c0d37596f4a9fc4e9ab3e096105c73e78.png"/>
+            <img alt="PlayStation Studios" class="psstudios" src="/assets/shared/ps-studios-280dde514c4ef23e8f1072cafab9b563fe354a21f11bb32bcc6d48fc592a32df.png"/>
+            <img alt="San Diego Studio" class="sds" src="/assets/shared/sds-9519f860b1cf2e537fa8088552f391df9c84a19bcf5c64ba5a0023ec5c0bcea8.png"/>
+            <img alt="ESRB" class="esrb" src="/assets/shared/esrbe-5f54d652c56a4617dfcf442fe05cbdecd9bbb17c207bde4c9d12852c135cc13f.png"/>
+            <a href="https://www.esrb.org/confirm/scea-confirmation.aspx" target="_blank" aria-label="ESRB">
+              <img alt= "ESRB Privacy Certified" class="esrbcert" src="/assets/shared/esrbcert-651427d986b2fe03e572bed36fdba551e637d919814bbed52318da94ab90e923.png"/>
+            </a>
+          </div>
+        </div>
+        <div class="footer-legal">
+          <div class="footer-terms">
+            <a href="https://www.playstation.com/en-us/legal/terms-of-use/" target="_blank">Terms of Use</a>
+            <a href="https://www.playstation.com/en-us/network/legal/privacy-policy/" target="_blank">Privacy Policy</a>
+            <a target="_blank" href="https://theshow.com/the-show-community-code-of-conduct/">TheShow.com Community Code of Conduct</a>
+            <a target="_blank" href="https://theshow.com/mlb-the-show-online-code-of-conduct/">MLB The Show Online Code of Conduct</a>
+            <a href="https://theshow.com/games">MLB The Show Games</a>
+          </div>
+          <div class="footer-copy">
+            <p>
+              “PlayStation Family Mark”, “PlayStation”, “PlayStation Studios logo”, “PS5 Logo”, and “Play Has No
+              Limits” are registered trademarks or trademarks of Sony Interactive Entertainment Inc. ©2026 Sony
+              Interactive Entertainment LLC. MLB and MiLB trademarks and copyrights are used with permission of
+              Major League Baseball. Visit MLB.com and MiLB.com. Officially Licensed Product of MLB Players, Inc.
+              MLBPA trademarks, copyrighted works and other intellectual property rights are owned and/or held by
+              MLBPA and may not be used without the written consent of MLBPA or MLB Players, Inc. Visit
+              MLBPLAYERS.com, the Players Choice on the web. The Baseball Hall of Fame and Museum trademarks
+              and copyrights are used with permission of the National Baseball Hall of Fame and Museum, Inc., as
+              applicable. Visit the official website of the Hall of Fame at BaseballHall.org. Official Licensee-Major
+              League Alumni Marketing, Inc. © MLAM. Officially Licensed by the Negro Leagues Baseball Museum, Inc.
+              Kansas City, MO. Stubs is a registered trademark or trademark of Sony Interactive Entertainment LLC.
+              Nintendo Switch is a trademark of Nintendo. All other trademarks are the property of their respective
+              owners. Trademarks, copyrights, names, images and other proprietary materials are used with permission
+              of World Baseball Classic, Inc.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+    
+    
+  <style>
+    #table-buy-now tbody tr{
+  display: none;
+}
+
+#table-sell-now tbody tr{
+  display: none;
+}
+
+.mlb20-ccl-players-container {
+  justify-content: flex-start !important;
+}
+.mlb20-ccl-players-each {
+  margin-right: 5px !important;
+}
+.mlb20-ccl-header {
+  background: linear-gradient(90deg, rgb(32, 33, 37) 0%, rgb(22, 23, 27) 80%) !important;
+}
+.mlb20-ccl-subheader {
+  background: linear-gradient(90deg, rgb(32, 33, 37) 0%, rgb(22, 23, 27) 80%) !important;
+}
+.mlb20-ccl-schedule .fc-list-event-title p {
+  margin: 0;
+}
+.mlb20-ccl-schedule .fc-direction-ltr .fc-list-table .fc-list-event-graphic {
+  display: none;
+}
+.mlb20-card-inside-edge {
+  display: flex;
+  justify-content: center;
+}
+  </style>
+
+  <script>
+    $('.global-menu-links li:last').remove();
+$('.global-content-menu-links li:last').remove();
+
+var pa_link = "<li><a id='pa-link' href='https://theplayersalliance.com' target='_blank'>Players Alliance<svg height='8' viewBox='0 0 8 8' width='8' xmlns='http://www.w3.org/2000/svg'><path d='M0 0v8h8v-2h-1v1h-6v-6h1v-1h-2zm4 0l1.5 1.5-2.5 2.5 1 1 2.5-2.5 1.5 1.5v-4h-4z'></path></svg></a></li>";
+$(".global-menu-links").append(pa_link);
+$(".global-content-menu-links").append(pa_link);
+
+$(".votable-body .title-button").parent().append('<br/><br/><small>Only trades and free agent signings confirmed by the teams are included as of publishing.</small>');
+  </script>
+
+  </body>
+</html>
