@@ -1,7 +1,7 @@
 """
 MLB The Show 26 - Marketplace Tool
 
-Automated analysis of silver card market with inventory cross-reference.
+Automated analysis of silver/gold/diamond card market with inventory cross-reference.
 Identifies flip opportunities and gives direct links for manual orders.
 
 Auth: manually update cookies.json with _tsn_session and tsn_token
@@ -16,6 +16,8 @@ Usage:
   python main.py --sell       # sell owned cards from inventory
   python main.py --flip       # continuous: sell → buy → repeat
   python main.py --flip-buy   # continuous: buy → sell → repeat
+  python main.py --no-gold    # skip gold cards
+  python main.py --no-diamond # skip diamond cards
 """
 
 import json
@@ -33,6 +35,10 @@ from api import (
 
 ITEM_URL = "https://mlb26.theshow.com/items"
 
+# Diamond cards >10k cost must have >2% profit after tax
+DIAMOND_HIGH_COST_THRESHOLD = 10000
+DIAMOND_HIGH_COST_MIN_PCT = 2.0
+
 
 # ─── Price helpers ──────────────────────────────────────────────────────────
 
@@ -48,13 +54,16 @@ def parse_price(value) -> int | None:
 
 # ─── Market analysis ────────────────────────────────────────────────────────
 
-def analyze_listings(listings: list[dict], sort_by: str = "profit") -> list[dict]:
+def analyze_listings(listings: list[dict], sort_by: str = "profit",
+                     rarity: str = "silver") -> list[dict]:
     """
     Compute flip profit for each listing, accounting for 10% sell tax.
 
     sort_by:
       "profit"     — absolute stub profit (good for silvers)
-      "efficiency" — profit^2 / cost, balances profit with capital efficiency (good for golds)
+      "efficiency" — profit^2 / cost, balances profit with capital efficiency (good for golds/diamonds)
+
+    For diamond cards costing >10k: filters out cards with <2% profit after tax.
     """
     results = []
 
@@ -75,6 +84,11 @@ def analyze_listings(listings: list[dict], sort_by: str = "profit") -> list[dict
         profit_pct = (profit / cost) * 100
         # efficiency score: rewards high profit but penalizes high capital
         efficiency = (profit * profit) / cost
+
+        # Diamond >10k filter: must have >2% profit to be worth the risk
+        if rarity == "diamond" and cost > DIAMOND_HIGH_COST_THRESHOLD:
+            if profit_pct < DIAMOND_HIGH_COST_MIN_PCT:
+                continue
 
         item = listing.get("item", {})
         results.append({
@@ -110,17 +124,17 @@ def apply_blacklist(cards: list[dict], blacklist: set[str]) -> list[dict]:
 
 # ─── Display ────────────────────────────────────────────────────────────────
 
-def print_market(cards: list[dict], top_n: int | None = None):
+def print_market(cards: list[dict], top_n: int | None = None, label: str = "Silver"):
     """Print market flip opportunities."""
     show = cards[:top_n] if top_n else cards
     if not show:
-        print("\n  No cards with active orders.")
+        print(f"\n  No {label.lower()} cards with active orders.")
         return
 
     count_label = f"{len(show)}/{len(cards)}" if top_n and top_n < len(cards) else str(len(show))
 
     print(f"\n{'=' * 95}")
-    print(f"  Silver Card Flip Opportunities — Top {count_label} by Profit (after 10% tax)")
+    print(f"  {label} Card Flip Opportunities — Top {count_label} by Profit (after 10% tax)")
     print(f"{'=' * 95}")
     print(
         f"  {'#':<4} {'Name':<28} {'OVR':>4} {'Pos':<4} "
@@ -196,6 +210,7 @@ def main():
     auto_flip = "--flip" in sys.argv or "--flip-buy" in sys.argv
     flip_start = "buy" if "--flip-buy" in sys.argv else "sell"
     buy_gold = "--no-gold" not in sys.argv
+    buy_diamond = "--no-diamond" not in sys.argv
 
     print("=" * 55)
     print("  MLB The Show 26 — Marketplace Tool")
@@ -208,7 +223,7 @@ def main():
     print("    python main.py --sell     Sell owned cards from inventory")
     print("    python main.py --flip     Continuous: sell → buy → repeat")
     print("    python main.py --flip-buy Continuous: buy → sell → repeat")
-    print("    Add --no-gold to any mode to skip gold cards")
+    print("    Add --no-gold to skip gold, --no-diamond to skip diamond")
 
     # Load blacklist (used for both buy filtering and sell filtering)
     blacklist = load_blacklist()
@@ -216,25 +231,36 @@ def main():
         print(f"\n  Blacklist: {len(blacklist)} card(s) — {', '.join(sorted(blacklist))}")
 
     # 1. Market listings (no auth needed)
-    print("\n[1/3] Fetching silver card market listings...")
+    print("\n[1/4] Fetching silver card market listings...")
     silver_listings = fetch_all_listings("silver")
-    market = analyze_listings(silver_listings)
+    market = analyze_listings(silver_listings, rarity="silver")
     market = apply_blacklist(market, blacklist)
     print(f"  {len(market)} profitable silver cards.")
 
     gold_market = []
     gold_listings = []
     if buy_gold:
-        print("\n[2/3] Fetching gold card market listings...")
+        print("\n[2/4] Fetching gold card market listings...")
         gold_listings = fetch_all_listings("gold")
-        gold_market = analyze_listings(gold_listings, sort_by="efficiency")
+        gold_market = analyze_listings(gold_listings, sort_by="efficiency", rarity="gold")
         gold_market = apply_blacklist(gold_market, blacklist)
         print(f"  {len(gold_market)} profitable gold cards.")
     else:
-        print("\n[2/3] Gold buying disabled (--no-gold)")
+        print("\n[2/4] Gold buying disabled (--no-gold)")
+
+    diamond_market = []
+    diamond_listings = []
+    if buy_diamond:
+        print("\n[3/4] Fetching diamond card market listings...")
+        diamond_listings = fetch_all_listings("diamond")
+        diamond_market = analyze_listings(diamond_listings, sort_by="efficiency", rarity="diamond")
+        diamond_market = apply_blacklist(diamond_market, blacklist)
+        print(f"  {len(diamond_market)} profitable diamond cards (>10k: >2% profit required).")
+    else:
+        print("\n[3/4] Diamond buying disabled (--no-diamond)")
 
     # Save name→rarity→uuid mapping from ALL listings for sell flow
-    all_listings = silver_listings + gold_listings
+    all_listings = silver_listings + gold_listings + diamond_listings
     uuid_map = {}
     for listing in all_listings:
         item = listing.get("item", {})
@@ -250,12 +276,12 @@ def main():
     print(f"  Saved {len(uuid_map)} name→uuid mappings.")
 
     # Combined analyzed market for display
-    all_market = market + gold_market
+    all_market = market + gold_market + diamond_market
 
-    # 3. Inventory (needs auth)
+    # 4. Inventory (needs auth)
     owned = []
     if not market_only:
-        print("\n[3/3] Fetching your inventory...")
+        print("\n[4/4] Fetching your inventory...")
         try:
             cookies = load_cookies()
             session = create_session(cookies)
@@ -268,31 +294,36 @@ def main():
             print(f"  Auth error: {e}")
             print("  Update cookies.json and try again.")
     else:
-        print("\n[3/3] Skipped inventory (--market mode)")
+        print("\n[4/4] Skipped inventory (--market mode)")
 
-    # 3. Results
+    # 4. Results
     print("\n" + "=" * 55)
     print("  RESULTS")
     print("=" * 55)
 
-    print_market(market, top_n=25)
+    print_market(market, top_n=25, label="Silver")
     if gold_market:
         print(f"\n  + {len(gold_market)} profitable gold cards (top 5):")
         for i, c in enumerate(gold_market[:5], 1):
             print(f"    {i}. {c['name']:<28} {c['spread']:>5,}s profit  {c['sell_now']+1:>5,}s cost")
 
+    if diamond_market:
+        print(f"\n  + {len(diamond_market)} profitable diamond cards (top 5):")
+        for i, c in enumerate(diamond_market[:5], 1):
+            print(f"    {i}. {c['name']:<28} {c['spread']:>5,}s profit  {c['sell_now']+1:>6,}s cost  {c['spread_pct']:>5.1f}%")
+
     if owned:
         print_owned_with_market(owned, all_market)
 
-    # 4. Action prompt
-    if not market and not gold_market:
-        return {"market": market, "gold_market": gold_market, "owned": owned}
+    # 5. Action prompt
+    if not market and not gold_market and not diamond_market:
+        return {"market": market, "gold_market": gold_market, "diamond_market": diamond_market, "owned": owned}
 
     if auto_buy:
         from automation import run_buy_orders
 
-        print(f"\n  {len(market)} silvers + {len(gold_market)} golds sorted by profit")
-        print(f"  Price: sell_now + 1 | Min profit: 30 | Stops at stubs < 150\n")
+        print(f"\n  {len(market)} silvers + {len(gold_market)} golds + {len(diamond_market)} diamonds")
+        print(f"  Price: sell_now + 1 | Min profit: 35 (silver), 100 (gold), 200 (diamond)")
         print(f"    {'#':<4} {'Name':<28} {'Profit':>7} {'Cost':>7} {'Prof%':>7}")
         print(f"    {'-' * 55}")
         for i, c in enumerate(market[:10], 1):
@@ -304,14 +335,20 @@ def main():
         if buy_gold and gold_market:
             print("\n  Now checking golds...")
             run_buy_orders(gold_market[:10], skip_clear=True, min_profit=100, rarity="gold", skip_navigate=True)
+        if buy_diamond and diamond_market:
+            print("\n  Now checking diamonds...")
+            run_buy_orders(diamond_market[:10], skip_clear=True, min_profit=200, rarity="diamond", skip_navigate=True)
     elif auto_sell:
         from automation import run_sell_orders
 
         print(f"\n  Sell mode: selling owned cards from inventory.")
         print(f"  Price: buy_now - 1 (undercut lowest sell order)")
-        run_sell_orders(rarity="silver")
+        print(f"  Order: diamond → gold → silver")
+        if buy_diamond:
+            run_sell_orders(rarity="diamond")
         if buy_gold:
-            run_sell_orders(skip_clear=True, rarity="gold")
+            run_sell_orders(skip_clear=buy_diamond, rarity="gold")
+        run_sell_orders(skip_clear=(buy_diamond or buy_gold), rarity="silver")
     elif auto_flip:
         from automation import (
             run_sell_orders, run_buy_orders,
@@ -328,15 +365,22 @@ def main():
             # Phase 1: Sell (skip on first cycle if starting with buy)
             sold_names = set()
             if not (first_cycle and flip_start == "buy"):
-                print("\n  === PHASE 1a: SELL SILVERS ===\n")
-                sell_result = run_sell_orders(skip_clear=False, rarity="silver")
-                sold_names = set(sell_result.get("sold_names", [])) if sell_result else set()
+                if buy_diamond:
+                    print("\n  === PHASE 1a: SELL DIAMONDS ===\n")
+                    diamond_sell_result = run_sell_orders(skip_clear=False, rarity="diamond")
+                    if diamond_sell_result:
+                        sold_names.update(diamond_sell_result.get("sold_names", []))
 
                 if buy_gold:
                     print("\n  === PHASE 1b: SELL GOLDS ===\n")
-                    gold_sell_result = run_sell_orders(skip_clear=True, rarity="gold")
+                    gold_sell_result = run_sell_orders(skip_clear=buy_diamond, rarity="gold")
                     if gold_sell_result:
                         sold_names.update(gold_sell_result.get("sold_names", []))
+
+                print("\n  === PHASE 1c: SELL SILVERS ===\n")
+                sell_result = run_sell_orders(skip_clear=(buy_diamond or buy_gold), rarity="silver")
+                if sell_result:
+                    sold_names.update(sell_result.get("sold_names", []))
 
                 if sold_names:
                     print(f"\n  Sold {len(sold_names)} total cards — will skip in buy phase.")
@@ -347,13 +391,12 @@ def main():
             print("\n  === PHASE 2: CLEAR BUY ORDERS ===\n")
             clear_buy_orders()
 
-            # Phase 3: Refresh market data (as fresh as possible)
-            # Reload blacklist each cycle in case it was edited
+            # Phase 3: Refresh market data
             blacklist = load_blacklist()
 
-            print("\n  === PHASE 3: REFRESH MARKET DATA (SILVER) ===\n")
+            print("\n  === PHASE 3a: REFRESH MARKET DATA (SILVER) ===\n")
             silver_listings = fetch_all_listings("silver")
-            silver_market = analyze_listings(silver_listings)
+            silver_market = analyze_listings(silver_listings, rarity="silver")
             silver_market = apply_blacklist(silver_market, blacklist)
             print(f"  {len(silver_market)} profitable silver cards found.")
 
@@ -362,12 +405,21 @@ def main():
             if buy_gold:
                 print("\n  === PHASE 3b: REFRESH MARKET DATA (GOLD) ===\n")
                 gold_listings_cycle = fetch_all_listings("gold")
-                gold_market = analyze_listings(gold_listings_cycle, sort_by="efficiency")
+                gold_market = analyze_listings(gold_listings_cycle, sort_by="efficiency", rarity="gold")
                 gold_market = apply_blacklist(gold_market, blacklist)
                 print(f"  {len(gold_market)} profitable gold cards found.")
 
+            diamond_market = []
+            diamond_listings_cycle = []
+            if buy_diamond:
+                print("\n  === PHASE 3c: REFRESH MARKET DATA (DIAMOND) ===\n")
+                diamond_listings_cycle = fetch_all_listings("diamond")
+                diamond_market = analyze_listings(diamond_listings_cycle, sort_by="efficiency", rarity="diamond")
+                diamond_market = apply_blacklist(diamond_market, blacklist)
+                print(f"  {len(diamond_market)} profitable diamond cards found.")
+
             # Save uuid map from ALL listings with rarity
-            all_listings = silver_listings + gold_listings_cycle
+            all_listings = silver_listings + gold_listings_cycle + diamond_listings_cycle
             uuid_map = {}
             for listing in all_listings:
                 item = listing.get("item", {})
@@ -381,22 +433,26 @@ def main():
             with open("uuid_map.json", "w") as f:
                 json.dump(uuid_map, f, indent=2)
 
-            if not silver_market and not gold_market:
+            if not silver_market and not gold_market and not diamond_market:
                 print("  No profitable cards. Waiting 60s before retry...")
                 time.sleep(60)
                 cycle += 1
                 continue
 
-            # Phase 4: Buy silvers (top 20, profit >= 35)
+            # Phase 4: Buy silvers
             if silver_market:
                 print("\n  === PHASE 4: BUY SILVERS ===\n")
                 run_buy_orders(silver_market[:30], skip_clear=True, skip_names=sold_names, min_profit=35, rarity="silver")
 
-            # Phase 5: Buy golds (top 10, profit >= 200, stubs floor 3k)
-            # skip_navigate — stay on marketplace, just switch filter
+            # Phase 5: Buy golds
             if buy_gold and gold_market:
                 print("\n  === PHASE 5: BUY GOLDS ===\n")
                 run_buy_orders(gold_market[:10], skip_clear=True, skip_names=sold_names, min_profit=100, rarity="gold", skip_navigate=True)
+
+            # Phase 6: Buy diamonds
+            if buy_diamond and diamond_market:
+                print("\n  === PHASE 6: BUY DIAMONDS ===\n")
+                run_buy_orders(diamond_market[:10], skip_clear=True, skip_names=sold_names, min_profit=200, rarity="diamond", skip_navigate=True)
 
             cycle += 1
             first_cycle = False

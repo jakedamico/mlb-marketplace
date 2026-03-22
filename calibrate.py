@@ -30,6 +30,8 @@ COORD_DEFS = {
         ("BTN_MKT_FILTER_DROPDOWN", "Rarity type dropdown (auto-expanded)"),
         ("BTN_MKT_GOLD_FROM_SILVER", "Gold option when currently filtered to SILVER"),
         ("BTN_MKT_SILVER_FROM_GOLD", "Silver option when currently filtered to GOLD"),
+        ("BTN_MKT_DIAMOND_FROM_GOLD", "Diamond option when currently filtered to GOLD"),
+        ("BTN_MKT_SILVER_FROM_DIAMOND", "Silver option when currently filtered to DIAMOND"),
         ("BTN_MKT_FILTER_CLOSE_RARITY", "Close rarity dropdown"),
         ("BTN_MKT_FILTER_SHOW", "Show results button"),
     ],
@@ -59,14 +61,25 @@ COORD_DEFS = {
         ("BTN_FILTER_DROPDOWN", "Rarity dropdown"),
         ("BTN_FILTER_SILVER", "Silver option in inventory dropdown"),
         ("BTN_FILTER_GOLD", "Gold option in inventory dropdown"),
+        ("BTN_FILTER_DIAMOND", "Diamond option in inventory dropdown"),
         ("BTN_FILTER_SHOW", "Show results button"),
-        ("SLOT1_CLICK", "First card slot — click to open"),
-        ("SLOT2_CLICK", "Second card slot — click to open"),
+    ],
+    "inventory_grid": [
+        ("QUAD_CLICK_TL", "Top-left card — center click position"),
+        ("QUAD_CLICK_TR", "Top-right card — center click position"),
+        ("QUAD_CLICK_BL", "Bottom-left card — center click position"),
+        ("QUAD_CLICK_BR", "Bottom-right card — center click position"),
+    ],
+    "sellability_checks": [
+        ("MENU_BTN_CHECK", "Menu button (three dots) on card page — for sellability check"),
+    ],
+    "scroll": [
+        ("SCROLL_DOWN_START", "Inventory scroll down — START (near bottom cards)"),
+        ("SCROLL_DOWN_END", "Inventory scroll down — END (near top cards)"),
+        ("SWIPE_START", "Inventory pull-to-refresh — START (top)"),
+        ("SWIPE_END", "Inventory pull-to-refresh — END (bottom)"),
     ],
     "color_checks": [
-        ("SLOT1_EMPTY_CHECK", "Slot 1 empty check pixel (should be 0c2340 when empty)"),
-        ("SLOT1_UNSELLABLE_CHECK", "Slot 1 unsellable check pixel (d93c00 when unsellable)"),
-        ("SLOT2_EMPTY_CHECK", "Slot 2 empty check pixel (0c2340 when empty)"),
         ("ORDER_CHECK_POS", "Active order check pixel (fd5900 when order exists)"),
         ("BTN_CANCEL_ORDER", "Cancel order button (same as order check)"),
         ("BTN_CONFIRM_CANCEL", "Confirm cancel button"),
@@ -77,11 +90,11 @@ COORD_DEFS = {
         ("CARD_NAME_BOX_TL", "Card name on detail page — TOP LEFT corner"),
         ("CARD_NAME_BOX_BR", "Card name on detail page — BOTTOM RIGHT corner"),
     ],
-    "swipe": [
-        ("SWIPE_START", "Inventory swipe refresh — START (top)"),
-        ("SWIPE_END", "Inventory swipe refresh — END (bottom)"),
-    ],
 }
+
+# Entries that store only one axis (X or Y) — recorded as coordinate pair
+# but only one axis is written to the scalar key in the JSON
+SCALAR_ENTRIES = {}
 
 
 def load_coords() -> dict:
@@ -98,9 +111,25 @@ def save_coords(coords: dict):
     print(f"\n  Saved to {COORDS_FILE}")
 
 
+def _get_display_value(name: str, coords: dict) -> str:
+    """Get the display string for a coordinate (handles scalar entries)."""
+    if name in SCALAR_ENTRIES:
+        scalar_key, axis = SCALAR_ENTRIES[name]
+        val = coords.get(scalar_key)
+        if val is not None:
+            return f"{axis}={val}"
+        return "[not set]"
+    else:
+        saved = coords.get(name)
+        if saved:
+            if isinstance(saved, list) and len(saved) == 2:
+                return f"({saved[0]}, {saved[1]})"
+            return str(saved)
+        return "[not set]"
+
+
 def record(name: str, desc: str, coords: dict):
-    saved = coords.get(name)
-    status = f"({saved[0]}, {saved[1]})" if saved else "[not set]"
+    status = _get_display_value(name, coords)
     print(f"\n  >>> {name}  {status}")
     print(f"  {desc}")
     skip = input("  ENTER to record, 's' to skip: ").strip().lower()
@@ -109,8 +138,15 @@ def record(name: str, desc: str, coords: dict):
     print("  Move mouse there and press ENTER.")
     input("  ")
     x, y = pyautogui.position()
-    coords[name] = [x, y]
-    print(f"  Recorded: ({x}, {y})")
+
+    if name in SCALAR_ENTRIES:
+        scalar_key, axis = SCALAR_ENTRIES[name]
+        val = x if axis == "x" else y
+        coords[scalar_key] = val
+        print(f"  Recorded: {scalar_key} = {val} (from {axis} of ({x}, {y}))")
+    else:
+        coords[name] = [x, y]
+        print(f"  Recorded: ({x}, {y})")
 
 
 def show_status(coords: dict):
@@ -118,8 +154,8 @@ def show_status(coords: dict):
     for section, items in COORD_DEFS.items():
         print(f"  [{section}]")
         for name, desc in items:
-            c = coords.get(name)
-            print(f"    {name}: {f'({c[0]}, {c[1]})' if c else '[not set]'}")
+            status = _get_display_value(name, coords)
+            print(f"    {name}: {status}")
         print()
 
 
@@ -140,6 +176,17 @@ def calibrate_all(coords: dict):
         calibrate_section(section, coords)
 
 
+def set_max_scrolls(coords: dict):
+    """Set the MAX_SCROLL_ATTEMPTS value."""
+    current = coords.get("MAX_SCROLL_ATTEMPTS", 10)
+    print(f"\n  Current MAX_SCROLL_ATTEMPTS: {current}")
+    val = input(f"  New value (ENTER to keep {current}): ").strip()
+    if val.isdigit():
+        coords["MAX_SCROLL_ATTEMPTS"] = int(val)
+        save_coords(coords)
+        print(f"  Set to {val}")
+
+
 def main():
     coords = load_coords()
 
@@ -153,11 +200,19 @@ def main():
     while True:
         print("  Options:")
         for i, section in enumerate(sections, 1):
-            count = sum(1 for name, _ in COORD_DEFS[section] if name in coords)
+            count = 0
             total = len(COORD_DEFS[section])
+            for name, _ in COORD_DEFS[section]:
+                if name in SCALAR_ENTRIES:
+                    scalar_key, _ = SCALAR_ENTRIES[name]
+                    if scalar_key in coords:
+                        count += 1
+                elif name in coords:
+                    count += 1
             print(f"    {i}. {section} ({count}/{total})")
         print(f"    a. Calibrate all")
         print(f"    s. Show current")
+        print(f"    m. Set max scroll attempts (currently {coords.get('MAX_SCROLL_ATTEMPTS', 10)})")
         print(f"    q. Quit")
 
         choice = input("\n  Choice: ").strip().lower()
@@ -167,6 +222,8 @@ def main():
             calibrate_all(coords)
         elif choice == "s":
             show_status(coords)
+        elif choice == "m":
+            set_max_scrolls(coords)
         elif choice.isdigit() and 1 <= int(choice) <= len(sections):
             calibrate_section(sections[int(choice) - 1], coords)
         else:
