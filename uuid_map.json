@@ -1,1216 +1,1138 @@
 {
-  "Joe Jimen\u00e9z": {
-    "silver": "49ca3c5a6f1509560354ecb9642d9b92"
-  },
-  "Will Vest": {
-    "silver": "1e8f94ec484c9a459fcd3f78291e9e50"
-  },
-  "Jalen Beeks": {
-    "silver": "17c008adb6e5e62bd453826459959e0c"
-  },
-  "Carson Fulmer": {
-    "silver": "e85a8cadf73717c688486c96abd4ca45"
-  },
-  "Bubba Chandler": {
-    "silver": "2673d2c7614f8e731ad4d251e9003326"
-  },
-  "Spencer Torkelson": {
-    "silver": "3eb9867e9044e2ad5d263281105bdc39"
-  },
-  "Sean Manaea": {
-    "silver": "0d1408257dc70fb5cda1086107d7f35c"
-  },
-  "Mitch Keller": {
-    "silver": "9600f07c264339226b66459f18ea30f6"
-  },
-  "Lawrence Butler": {
-    "silver": "25b99b46528a3d3ba6e526011b57449d"
-  },
-  "Gavin Williams": {
-    "silver": "9933ab4227edf9a224a0871a57e1a281"
-  },
-  "Casey Mize": {
-    "silver": "1164ca62a7c5e6db9a28f10de26be287"
-  },
-  "Randy Arozarena": {
-    "silver": "586dd68af8f58379bd085c710e64b6c0"
-  },
-  "Austin Wells": {
-    "silver": "ddcefc43e36ebe4a1bd352c69c4569f4"
-  },
-  "Tanner Scott": {
-    "silver": "acf6a4d732a2f4534bada963a514d076"
-  },
-  "Blake Treinen": {
-    "silver": "be1c850e22b08165923ab513481fb70b"
-  },
-  "Adolis Garc\u00eda": {
-    "silver": "c8b37a9d2f7535710a50102c1a66fa10"
-  },
-  "CJ Abrams": {
-    "silver": "94557d368a572d073dd6aae8f55e3984"
-  },
-  "Jared Jones": {
-    "silver": "da915981070931cea2471686a713574c"
-  },
-  "Kyle Finnegan": {
-    "silver": "42a67ea84b36e189d27d9dbfac4ac560",
-    "diamond": "83fe18dc984c3fb82de72075332e525a"
-  },
-  "Taj Bradley": {
-    "silver": "f59e66ec9d93de41f80405fbf0f3f4a4"
-  },
-  "Reese Olson": {
-    "silver": "bf0f2616d74a61d4d638e40cc4e06b6b"
-  },
-  "Brayan Bello": {
-    "silver": "711618c6f57d660450ea73d7ff98afe3",
-    "gold": "79ec96dacdb53fcbc78cb826f9620c04"
-  },
-  "Tanner Banks": {
-    "silver": "d075296056a095f635a6e7e9068342f9"
-  },
-  "Sean Murphy": {
-    "silver": "707b79175f8a219bee0db03aca62c426"
-  },
-  "Zack Littell": {
-    "silver": "791dd04e0de4ec1f39395063bb1e0224"
-  },
-  "Jacob Misiorowski": {
-    "silver": "e25439bd0d42a5a005abc2214edf64cd"
-  },
-  "Framber Valdez": {
-    "silver": "03715b6e6446f9cb0ab12ee10e434f3c"
-  },
-  "Chad Patrick": {
-    "silver": "ce6c8eef5f8a39c6ac1cd87ba2b6927d"
-  },
-  "Pete Fairbanks": {
-    "silver": "729cb3109d1eff9ffe4863d9d1580198"
-  },
-  "J.T. Realmuto": {
-    "silver": "a4af60a1590a3a5de8ae540cb3c3dad2"
-  },
-  "Michael Busch": {
-    "silver": "b0114970026542959ebd4757695230e6"
-  },
-  "Jason Adam": {
-    "silver": "fc16a28187ca6431fa15309f53d96d7e"
-  },
-  "Tommy Edman": {
-    "silver": "5a12f832b3f714b02c366459973e5ceb"
-  },
-  "Pablo L\u00f3pez": {
-    "silver": "f61de812599096845898b305bd927478"
-  },
-  "Miguel Andujar": {
-    "silver": "4928f45c3eb75e1c871c5cbe5cad500c"
-  },
-  "Luis Castillo": {
-    "silver": "01087ae4c0f050fd4a091810083377b8"
-  },
-  "Eduard Bazardo": {
-    "silver": "0bf6805b865addee3142cbbe5d06fe4c"
-  },
-  "Sal Frelick": {
-    "silver": "22966936e0c8b00cbd3954e176b84cfb"
-  },
-  "Sonny Gray": {
-    "silver": "ffa4ac61be1bece4afae31f352f59900"
-  },
-  "Max Muncy": {
-    "silver": "639db54503b4523ff50af77d02ec142e"
-  },
-  "David Bednar": {
-    "silver": "86c65a58bb2a2f4d0a563e8e6b35d190"
-  },
-  "Jorge Polanco": {
-    "silver": "deffe6d6252ad606af887d356fe30b93"
-  },
-  "Nick Lodolo": {
-    "silver": "40115f501abc9303c9b5dd7ce277fc7b"
-  },
-  "Aaron Ashby": {
-    "silver": "df3d68a0fc67e10bf28b88c87b0ded23"
-  },
-  "Emmet Sheehan": {
-    "silver": "639bf1132a9cbef56d9687b8eb5544c6"
-  },
-  "Yu Darvish": {
-    "silver": "e495202337a409054b2628990dc45623"
-  },
-  "Dillon Dingler": {
-    "silver": "180698e05bf81aa326d6a8e6047533c8"
-  },
-  "Willson Contreras": {
-    "silver": "09a18061424a1ed2510d8b994b77db51",
-    "diamond": "371e662f8f8f50d323f82efedcc6e34f"
-  },
-  "Garrett Whitlock": {
-    "silver": "eb21eae0f6435466b772def27ccbfbfb"
-  },
-  "Brooks Raley": {
-    "silver": "b0df33bc0c296a7657519b8e3304f98e"
-  },
-  "Ryne Nelson": {
-    "silver": "aa132b7258a5df8ec89267ab25bd63e9"
-  },
-  "TJ Friedl": {
-    "silver": "b8c293f8327e5743462b06abf4cd655c"
-  },
-  "Miguel Rojas": {
-    "silver": "b8dea6835754db72ec1644aeafb0fb9a"
-  },
-  "Chris Bassitt": {
-    "silver": "1f79a08e4ea21cdb1beab70f252ff77e"
-  },
-  "Steven Okert": {
-    "silver": "f79661c6c37e3ecc4cf3b0543e2556ee"
-  },
-  "Jameson Taillon": {
-    "silver": "22fe2d7f86f63909f4b014fb55b59d73"
-  },
-  "Tanner Bibee": {
-    "silver": "d903302407f590de0777cbf9251b6be8"
-  },
-  "Bryan King": {
-    "silver": "689ba1fdf5c5c993e083fdbbe152a65b"
-  },
-  "Kazuma Okamoto": {
-    "silver": "62eb88106da99fb2fb939c271c2f50ba",
-    "diamond": "dda8522397f45fe7f8ff73f79f287087"
-  },
-  "Cam Schlittler": {
-    "silver": "e9ff5819a7bb1593c208bb867a2fb9c5"
-  },
-  "Addison Barger": {
-    "silver": "1b37240090bd3b5947933b593ca4dfb3"
-  },
-  "Jake Burger": {
-    "silver": "8b84cfc91953858774bea63ec90baa1b"
-  },
-  "Drew Pomeranz": {
-    "silver": "353526353a2344b78720600b0e0cde48"
-  },
-  "Michael Wacha": {
-    "silver": "ed53ed5edcd037799a47fba92e48c49d"
-  },
-  "Shane Baz": {
-    "silver": "ac16fc2bd7d814b38a4055e2aaf515b0"
-  },
-  "Rob Refsnyder": {
-    "silver": "30e5afc3a783724f9b6b3dd52c454b86"
-  },
-  "Jonathan Aranda": {
-    "silver": "6c407bf5ea7d9ba106d998ef00a22453",
-    "gold": "d3c927fcc66b5882e1c49cd27e580781"
-  },
-  "Cole Ragans": {
-    "silver": "7e8394b93dd8fcfabc23ed23e1fad0d1"
-  },
-  "Royce Lewis": {
-    "silver": "6ca4c1203c7be186312580dcd7de4bf8"
-  },
-  "Kirby Yates": {
-    "silver": "12165416b6277ea19b2a00d178a464f4"
-  },
-  "Chris Martin": {
-    "silver": "74414a802d0a57b55a5c78d759c29c19"
-  },
-  "Marcell Ozuna": {
-    "silver": "ea2f253d735968487cd4094ff63c828f"
-  },
-  "Justin Wrobleski": {
-    "silver": "45c61bfb20ad79724ce0ea5d092331ab"
-  },
-  "Paul Goldschmidt": {
-    "silver": "c69147b4fab6c6ad62cfe66e9b4c9f63"
-  },
-  "A.J. Minter": {
-    "silver": "021745d6f71ce39dadfe9050385cb2e4"
-  },
-  "Isaac Paredes": {
-    "silver": "94f8ab9e5bfe963f70e980c5a9760588"
-  },
-  "Merrill Kelly": {
-    "silver": "b14023d60b548f8d8c3bdb5007d3bdaa"
-  },
-  "Emilio Pag\u00e1n": {
-    "silver": "9780a3e1b0451cba73e61d1eba533105"
-  },
-  "Xavier Edwards": {
-    "silver": "0f4f8a34441b911299ac49d18e7ba423"
-  },
-  "Michael Harris II": {
-    "silver": "80e7083d06ec6f2df0f8787210d63a7c"
-  },
-  "Phil Maton": {
-    "silver": "f1d59f71943e9167f938748f9d30980c"
-  },
-  "Austin Hays": {
-    "silver": "98cbb50dcd48e3c3582f564c1239fe0a"
-  },
-  "Ryan Walker": {
-    "silver": "7a9ac097d7b51912b51762090fbb4f4c"
-  },
-  "Edwin Uceta": {
-    "silver": "6bed9deae6ea58e8fc1fc4e0ce9c19b8"
-  },
-  "Kyle Stowers": {
-    "silver": "8d0432dd7486905342173168200ea467"
-  },
-  "Brenton Doyle": {
-    "silver": "ca481aae799e455177868b1fb36d6775"
-  },
-  "Dylan Cease": {
-    "silver": "ad71006586a34b68db870a2c5a57f3fc"
-  },
-  "Ernie Clement": {
-    "silver": "fdaa827453ddc92e497c2fd4abe0b0f4"
-  },
-  "Otto Lopez": {
-    "silver": "e530c3a13283bf920f787fc1e86d533c"
-  },
-  "Seranthony Dom\u00ednguez": {
-    "silver": "a379a1f5bb9598a61808afedfdb88a03",
-    "gold": "55fb77566aba38ade96f2da28aae64d1"
-  },
-  "Shane Smith": {
-    "silver": "3753c5f0a7298b22fdc53a7240f6c33a"
-  },
-  "Colson Montgomery": {
-    "silver": "4fb1eb9a7cd7ab573f57b46f57776728"
-  },
-  "Eury Perez": {
-    "silver": "9af93176b58bb55c3f235c0d2bbfedeb"
-  },
-  "Munetaka Murakami": {
-    "silver": "5ffedcec0dc09e3989f8cb0721fdad99",
-    "diamond": "694e6aa24631c7eafa5cc17da782e0c8"
-  },
-  "Roman Anthony": {
-    "silver": "18dd87c0996e9fbbec2c980c0ccecf98",
-    "diamond": "6d2a46efca22ab816e44a3cd71b707ca"
-  },
-  "Alec Burleson": {
-    "silver": "6c2543f242b643dcd5e57e427e311456"
-  },
-  "Ben Rice": {
-    "silver": "8ade6ab5936ca457d23b35e1c8b74420"
-  },
-  "Chase Burns": {
-    "silver": "75cd8c270f40bcca3498840f91787892"
-  },
-  "Randy Rodriguez": {
-    "silver": "855c010e110d475c891efa3b115090d5"
-  },
-  "Edward Cabrera": {
-    "silver": "6deea1d90037ac8a9bcb7953e8f61bfa"
-  },
-  "Chandler Simpson": {
-    "silver": "25a24504b2f4f5e039d4824c49586aba"
-  },
-  "Jake Cousins": {
-    "silver": "2cfb3393bc8ab3fb06cdbad757e0b695"
-  },
-  "Carlos Est\u00e9vez": {
-    "silver": "fbd00d23fe1b8e56f542e12fb6d30f90"
-  },
-  "Felix Bautista": {
-    "silver": "c5a3dce4fa2f882b39641b50cced7e30"
-  },
-  "Francisco Alvarez": {
-    "silver": "16a6b905b0216b52128f33bd16b1bbe7"
-  },
-  "Tyler Holton": {
-    "silver": "b2e6a3fd82f48fd558f9a1304ae1f5f9"
-  },
-  "Taylor Clarke": {
-    "silver": "a055ff6aca3c589b202de2f835858904"
-  },
-  "Jung Hoo Lee": {
-    "silver": "ef0280e3925f6f099408f01631e64488"
-  },
-  "Shawn Armstrong": {
-    "silver": "48cf29d81f4e45f38987a33600a1eae3"
-  },
-  "Xander Bogaerts": {
-    "silver": "1dd516c3113178e0c11da437be0dade5",
-    "diamond": "dcffed0b00282a280291d9989c3e635b"
-  },
-  "Brad Keller": {
-    "silver": "95c5801b4ccdee34459ae49d7a4207f4"
-  },
-  "Jack Dreyer": {
-    "silver": "b007f8e061ddabd72f070dcd0e647f06"
-  },
-  "Christian Walker": {
-    "silver": "7aa9e727d690fc29299053265a65f5d1"
-  },
-  "Tatsuya Imai": {
-    "silver": "ee07b8dd52aeb6a78be190ddfb15ef77"
-  },
-  "Zac Gallen": {
-    "silver": "5210140aba24331c6d6e24d05b2845a3"
-  },
-  "Ozzie Albies": {
-    "silver": "10a3ec7a23ed4e208ba9379e1930e007"
-  },
-  "Ryan O'Hearn": {
-    "silver": "f72626d76b353712503fcec1e5618d00",
-    "diamond": "5b0a8589d88ae8b04f7ae55ce11478d3"
-  },
-  "Tyler Kinley": {
-    "silver": "454e9fcf1cbc32310bfdb2003eadaa95"
-  },
-  "Josh Jung": {
-    "silver": "4373e707fa7739b400092a12b99795f4"
-  },
-  "Jack Flaherty": {
-    "silver": "2df6d9a57f7162a907e14f9612ec9f86"
-  },
-  "Wilyer Abreu": {
-    "silver": "3411c13cbf607bee956a43563c8ae3bf",
-    "diamond": "28edce15789eceb747d4d2f13b7aefdd"
-  },
-  "Danny Coulombe": {
-    "silver": "b6aa2a849179e33f7dfe4fe861d2eca9"
-  },
-  "Trevor Story": {
-    "silver": "38b4ba07593bc250d9b17e2cf73279b0"
-  },
-  "Lourdes Gurriel Jr.": {
-    "silver": "7e633e1e1c163cf17aa4042e27b4f925"
-  },
-  "Brandon Lowe": {
-    "silver": "22acbe50386607934e0e25de6131489d"
-  },
-  "Anthony Bender": {
-    "silver": "1e4ae00b86806282a9b22e4cbb31a880"
-  },
-  "Abner Uribe": {
-    "silver": "eaa378e49dfc68f55404c7a2246efbec"
-  },
-  "Bennett Sousa": {
-    "silver": "6988c11bcc98750e312047de3fadbccf"
-  },
-  "Nolan Arenado": {
-    "silver": "2898bd1c40495e0d55d441c271412ca0"
-  },
-  "Kerry Carpenter": {
-    "silver": "ab7be3366d7c6386894917545e7cd9dd"
-  },
-  "Luis Arraez": {
-    "silver": "530b3686dafd33d4102cac6399ee874e",
-    "diamond": "7ae0e0627c217a5ad5b7d240acf7d28a"
-  },
-  "Robert Suarez": {
-    "silver": "0231dd33516be08bb127ed94c79be264"
-  },
-  "Edmundo Sosa": {
-    "silver": "8a4fbef35261007a8ef2e6a0bc61b60a"
-  },
-  "Fernando Cruz": {
-    "silver": "4e63c14327a688cfa92bd9735027cf96"
-  },
-  "Alec Bohm": {
-    "silver": "96636c0b352b24fa766fd3473dac73a2"
-  },
-  "Shane Bieber": {
-    "silver": "9eb5a2bc3a8bc344ad0f7ec08d9bdc81"
-  },
-  "Masyn Winn": {
-    "silver": "1d7bea42cceb0984f059695f69f3156f"
-  },
-  "Ian Happ": {
-    "silver": "caaf16e544436453424abc4e2c6c9fdf"
-  },
-  "Daulton Varsho": {
-    "silver": "5e303884b55dfadbf9744134b978f02e"
-  },
-  "Corbin Burnes": {
-    "silver": "45c01906d91d8b3589613803040a914b"
-  },
-  "Andrew Abbott": {
-    "silver": "6c66804014e902f4bf40b9ac33a97b3f"
-  },
-  "Ramon Laureano": {
-    "silver": "0197bb2377d61f709bd44fd5784db370"
-  },
-  "Cade Horton": {
-    "silver": "b665dbde88b67544d5c57a3c6a54bdc2"
-  },
-  "Trevor Megill": {
-    "silver": "5b5448ccb922bb99fc61622cee95825d"
-  },
-  "Carson Kelly": {
-    "silver": "cfc421066e1e0c972013ff2e68fff4f2"
-  },
-  "Ryan Jeffers": {
-    "silver": "25f5292d8b2741007dd21963fa23159d"
-  },
-  "Lucas Erceg": {
-    "silver": "ddaa6b4994eb589adb067ba95b1f8c93"
-  },
-  "Trent Grisham": {
-    "silver": "b2cfe736a8e0b516581c6b053a10eb90"
-  },
-  "Ryan Helsley": {
-    "silver": "d43b0fdeb1d865b30f504f1245b2835d"
-  },
-  "A.J. Puk": {
-    "silver": "f34b5e3053f8f903b2ee7af0b5fe806b"
-  },
-  "Heliot Ramos": {
-    "silver": "2de4092a45e5e6ac16fe90c04049caac",
-    "diamond": "489539658dd9503c57c8da8435fe1eb5"
-  },
-  "Jos\u00e9 Alvarado": {
-    "silver": "d88407b8918523b461fd7956b731ca8b"
-  },
-  "Kris Bubic": {
-    "silver": "0dc0c1720aa5343303a5bdb4b8295b75"
-  },
-  "Alex Vesia": {
-    "silver": "fad3992128efc3573f10e9c2e29a657e"
-  },
-  "Tyler Soderstrom": {
-    "silver": "a598c575dadd66c4de6eac97da20d314"
-  },
-  "Andrew Kittredge": {
-    "silver": "67054e578e347fdacc86bd466fb62b63"
-  },
-  "Reynaldo L\u00f3pez": {
-    "silver": "27f943d39beafa49e72e1977604398c9"
-  },
-  "Ranger Su\u00e1rez": {
-    "silver": "2b7d319b529b30d9a7856e099319a84c"
-  },
-  "Ronny Henriquez": {
-    "silver": "ea695c0f60fa0717377056c14b76f540"
-  },
-  "Salvador Perez": {
-    "silver": "05c1a44d2f180f7935f5179781812b48",
-    "diamond": "d6b54c75e6ff3386283234650d57870b"
-  },
-  "Shelby Miller": {
-    "silver": "78a7126af4633c953072db13ed233844"
-  },
-  "Brendan Donovan": {
-    "silver": "0c453092933377fb7da88e9e344cc8ec"
-  },
-  "Anthony Santander": {
-    "silver": "47a29b5025c00e58da1525015aec138a"
-  },
-  "Jeff Hoffman": {
-    "silver": "242ccd752a959e5739da18dec8f2b5e2"
-  },
-  "Bryson Stott": {
-    "silver": "b79ab606a1792cf2f7993651e5a4c5c7"
-  },
-  "Robbie Ray": {
-    "silver": "cc1c3841958cd659a6da4946f9820ac8"
-  },
-  "Luke Weaver": {
-    "silver": "03f85a1ecce55c7189f455917799f465"
-  },
-  "Nolan McLean": {
-    "silver": "1ddd47d545b82b16c1ceea92a72c5af9",
-    "diamond": "45aa2ba3061d40614a3600ca4c4c9a37"
-  },
-  "Harrison Bader": {
-    "silver": "f8a108e03c95e95445f30004babcfca5"
-  },
-  "Justin Steele": {
-    "silver": "7761626eea6ad3f110390634551e371a"
-  },
-  "Matt Brash": {
-    "silver": "9362d8e2f391209fd9b3e4c3c007f105"
-  },
-  "Caleb Durbin": {
-    "silver": "366664af0a4bd428db7cd76d7d937365"
-  },
-  "Gleyber Torres": {
-    "silver": "250b2cbee4de7316affcc64201094be5",
-    "diamond": "7f860f0ae8119616cccb650124f80085"
-  },
-  "Spencer Strider": {
-    "silver": "4d9c92b0bd29ae56bdbb7b05be5729b0"
-  },
-  "Trey Yesavage": {
-    "silver": "e04c095b981c8beef9db5f772b2ecbd9"
-  },
-  "Jack Leiter": {
-    "silver": "1764dc2bf73a10aa163297f2a88cb752"
-  },
-  "Justin Sterner": {
-    "silver": "2e39bb272f24994300e7982c8764ea94"
-  },
-  "Brady Singer": {
-    "silver": "93475d052e87767b9aee258c1a73edf2"
-  },
-  "Eric Lauer": {
-    "silver": "5defeb4a595990da5f35dd786567f011"
-  },
-  "Anthony Banda": {
-    "silver": "6bc2d4f49e6e28ec867570f5cd1be65b"
-  },
-  "Noah Cameron": {
-    "silver": "bc9e7ed27e808f28bfd06f79baebdc66"
-  },
-  "Ian Hamilton": {
-    "silver": "57bd6391943108abbffd4323a9eb7c4f"
-  },
-  "Matthew Boyd": {
-    "silver": "3fa8fe658b2365e901d383cb3331910a"
-  },
-  "Clarke Schmidt": {
-    "silver": "06fd558962d71a025cee24950b7b4e93"
-  },
-  "Dylan Lee": {
-    "silver": "432a5b6b702897b9bd0fb3836fda306b"
-  },
-  "Tyler O'Neill": {
-    "silver": "2e4c54b42f64ddd47b3d44afa50f3811",
-    "diamond": "ded3916224a466cc6ff73aa27c765ba8"
-  },
-  "Shane McClanahan": {
-    "silver": "2931da769cca52d74d36e22bd335ec68"
-  },
-  "Ryan Pepiot": {
-    "silver": "f01d4724539ae0011f4807a0d9966b6f"
-  },
-  "Andr\u00e9s Gim\u00e9nez": {
-    "silver": "ea04a88e38fa4cd172419459e31b0960"
-  },
-  "Mauricio Dub\u00f3n": {
-    "silver": "37c744508d3763bde9480c5f0aa88fbd"
-  },
-  "Scott Barlow": {
-    "silver": "cb3097de2aad47a8c62d0695e18d92c9"
-  },
-  "Jake Mangum": {
-    "silver": "52bcec9abedd7cdc96a869448c5780b7"
-  },
-  "Tommy Nance": {
-    "silver": "20f061a7ce5399d5fe1130a49838cdd2"
-  },
-  "Mickey Moniak": {
-    "silver": "0eaa844b6e2639e9ccf5edb5b045407e"
-  },
-  "Ezequiel Tovar": {
-    "silver": "bb4db2335d9d210198179081822a324e"
-  },
-  "Robbie Glendinning": {
-    "gold": "c97469b27548cf501cb6e54e77941ef4"
+  "Devin Williams": {
+    "gold": [
+      "8ed6e39d561ae68b7895f01a923bd990"
+    ]
   },
   "Jeremiah Estrada": {
-    "gold": "8b03b664324b137f80e19dbd82fb2b98"
-  },
-  "Dennis Santana": {
-    "gold": "9b75b6569e4d9f565ae45a1b715f680d"
-  },
-  "Devin Williams": {
-    "gold": "8ed6e39d561ae68b7895f01a923bd990"
-  },
-  "Marcus Semien": {
-    "gold": "67ebc1689dcb63ed9ffcb71ebb0e56b0"
-  },
-  "Gabe Speier": {
-    "gold": "973c343c461feaeca95926dee290e9bb"
-  },
-  "Teoscar Hern\u00e1ndez": {
-    "gold": "408db3e3f9781754e45757d91159732e"
-  },
-  "Kevin Gausman": {
-    "gold": "7dc3697854dc6ffaaff9b82fd7ce30d2"
-  },
-  "Ceddanne Rafaela": {
-    "gold": "dad1a4f226c1ad8c6ea3b0a321985456",
-    "diamond": "e07b766d29985cbd7e3e8460a6c8243a"
-  },
-  "Michael King": {
-    "gold": "0bd263660cf5558bf09ef5b0ee2f6354"
-  },
-  "Brandon Nimmo": {
-    "gold": "c3e0328a67aa26757744245a41942b61"
-  },
-  "Matt Strahm": {
-    "gold": "59c76b723735c11ce502c8c6154164ad"
-  },
-  "Bryan Reynolds": {
-    "gold": "608a85f4bb70e0386a9458c6920759f7"
-  },
-  "Kenley Jansen": {
-    "gold": "9026e0071c6e7e24f8a10933a55a79dc",
-    "diamond": "cd2a0e239c3a0189c2ea0b709c533212"
-  },
-  "Yimi Garc\u00eda": {
-    "gold": "38ab87643030dcb61d34e8469a41c660"
+    "gold": [
+      "8b03b664324b137f80e19dbd82fb2b98"
+    ]
   },
   "Gabriel Moreno": {
-    "gold": "4ebb84b08ba9d2c88bf33e6283cf0ccd"
+    "gold": [
+      "4ebb84b08ba9d2c88bf33e6283cf0ccd"
+    ]
   },
-  "Adley Rutschman": {
-    "gold": "1324ea23c48ff165a6a7d654a500e3f7",
-    "diamond": "b6156a5119ace97d22c359bb84e385b4"
+  "Gabe Speier": {
+    "gold": [
+      "973c343c461feaeca95926dee290e9bb"
+    ]
   },
-  "Jordan Westburg": {
-    "gold": "b3f2b18d0f9bd13460d354b97a4b7ba5"
+  "Teoscar Hern\u00e1ndez": {
+    "gold": [
+      "408db3e3f9781754e45757d91159732e"
+    ]
   },
-  "Trevor Rogers": {
-    "gold": "e6fe3408c6203d8491a470acbf08c303"
+  "Bryan Reynolds": {
+    "gold": [
+      "608a85f4bb70e0386a9458c6920759f7"
+    ]
+  },
+  "Marcus Semien": {
+    "gold": [
+      "67ebc1689dcb63ed9ffcb71ebb0e56b0"
+    ]
+  },
+  "Kevin Gausman": {
+    "gold": [
+      "7dc3697854dc6ffaaff9b82fd7ce30d2"
+    ]
+  },
+  "Yimi Garc\u00eda": {
+    "gold": [
+      "38ab87643030dcb61d34e8469a41c660"
+    ]
+  },
+  "Ceddanne Rafaela": {
+    "gold": [
+      "dad1a4f226c1ad8c6ea3b0a321985456"
+    ],
+    "diamond": [
+      "e07b766d29985cbd7e3e8460a6c8243a"
+    ]
   },
   "Drew Rasmussen": {
-    "gold": "18ac16e82d52c6a8f639a23a35aaf13b"
+    "gold": [
+      "18ac16e82d52c6a8f639a23a35aaf13b"
+    ]
   },
-  "Juremi Profar": {
-    "gold": "93f3d514bccdcc3dbe343bde626cee44"
+  "Kenley Jansen": {
+    "gold": [
+      "9026e0071c6e7e24f8a10933a55a79dc"
+    ],
+    "diamond": [
+      "cd2a0e239c3a0189c2ea0b709c533212"
+    ]
   },
-  "Dansby Swanson": {
-    "gold": "763994e24854ab68e3f2eab1762db2eb"
-  },
-  "Kyle Bradish": {
-    "gold": "b46ecb1efcb9acb650525771f99e3da5"
+  "Michael King": {
+    "gold": [
+      "0bd263660cf5558bf09ef5b0ee2f6354"
+    ]
   },
   "Jo Adell": {
-    "gold": "58e326ec04da57d92ac58bf223fde051"
+    "gold": [
+      "58e326ec04da57d92ac58bf223fde051"
+    ]
+  },
+  "Trevor Rogers": {
+    "gold": [
+      "e6fe3408c6203d8491a470acbf08c303"
+    ]
   },
   "Garrett Cleavinger": {
-    "gold": "397c4506bc45559154635235925c34ea"
+    "gold": [
+      "397c4506bc45559154635235925c34ea"
+    ]
   },
-  "Gregory Soto": {
-    "gold": "3d07a2a52ec2996a939d11568a374fb8"
+  "Kyle Bradish": {
+    "gold": [
+      "b46ecb1efcb9acb650525771f99e3da5"
+    ]
   },
-  "Alex Hall": {
-    "gold": "176996dc8c9879c432173dbb334ca6fe"
+  "Jordan Westburg": {
+    "gold": [
+      "b3f2b18d0f9bd13460d354b97a4b7ba5"
+    ]
   },
-  "Vladimir Guerrero Jr.": {
-    "gold": "3fe940af6daa0433f3a3fdad16441dff",
-    "diamond": "a1743a162c13e95d81f7ffef209f2f52"
+  "Dansby Swanson": {
+    "gold": [
+      "763994e24854ab68e3f2eab1762db2eb"
+    ]
   },
-  "Byron Buxton": {
-    "gold": "bc1803df31e29cfb7e0b388f322f99fa",
-    "diamond": "c6aff446c59619c542634808fa2aed5a"
+  "Dennis Santana": {
+    "gold": [
+      "9b75b6569e4d9f565ae45a1b715f680d"
+    ]
   },
-  "Daniel Palencia": {
-    "gold": "0bfbf00f713e487457682a4b31284d25"
+  "Brandon Nimmo": {
+    "gold": [
+      "c3e0328a67aa26757744245a41942b61"
+    ]
   },
-  "Yu Chang": {
-    "gold": "060cf39a4b98cf136e75c699751e8454"
+  "Matt Strahm": {
+    "gold": [
+      "59c76b723735c11ce502c8c6154164ad"
+    ]
   },
-  "Hyeseong Kim": {
-    "gold": "d53cce1d17f9f52f4caf85f74e7d1844"
-  },
-  "Cade Smith": {
-    "gold": "ad61e144abe6cd16d8132eb82b26d44d"
-  },
-  "Jackson Merrill": {
-    "gold": "c947f75a502b342295c8fcf68d5b9590"
-  },
-  "Brent Rooker": {
-    "gold": "326429edc16a998e0a3020886cca8891"
-  },
-  "Dean Kremer": {
-    "gold": "fdb80e16fd9eaa34ef2d0da459fbfe1c"
-  },
-  "George Springer": {
-    "gold": "3ad82b308c619a30af8f7ed3428417d0"
-  },
-  "Bo Bichette": {
-    "gold": "df54709556e526558a05bd4825bc73c9"
-  },
-  "Logan Webb": {
-    "gold": "1db8c408ccc6a61a8d65f43b8754549e",
-    "diamond": "1ca21fc13eff71d412d25d41c49770d9"
-  },
-  "William Contreras": {
-    "gold": "0e07052fd941f0ae83ddf986fbff60fe"
-  },
-  "Jackson Chourio": {
-    "gold": "76ef7e9d2fac836db23a76579f733024"
-  },
-  "Joey Meneses": {
-    "gold": "376175f2c2a7f86d5b164114132802fc"
-  },
-  "Freddy Peralta": {
-    "gold": "4810434f5afe99779e49cdae6b76537d"
-  },
-  "Cristopher S\u00e1nchez": {
-    "gold": "3e6f045aba05631c48da29aacc9b6261"
-  },
-  "Manny Machado": {
-    "gold": "873258db6ddfd30f022361e1cf3b09a6",
-    "diamond": "453321beaa5d602172c9bdcd725e744f"
-  },
-  "Andr\u00e9s Mu\u00f1oz": {
-    "gold": "f40d34d36b7103d1b0cc8cef6b2bb9c6",
-    "diamond": "13153e488e46cab54a62525a179cafa0"
-  },
-  "Nico Hoerner": {
-    "gold": "db27a6583a1b0eefbc2ae6cc4f6cbcb9"
-  },
-  "Seiya Suzuki": {
-    "gold": "a48d1f88c8987e5df2c5919f3aace0aa"
-  },
-  "Alex Bregman": {
-    "gold": "f0ebd4c4328c1f69f801e892110647ee"
-  },
-  "Joe Ryan": {
-    "gold": "a1a576f02d863b09d77a7ceeb79592fb"
-  },
-  "Camilo Doval": {
-    "gold": "9ab261d0729c6ef94a362e1f6e75dcc6"
-  },
-  "Matt Davidson": {
-    "gold": "fcdcf5c3f65ca71f64e1a77b401d9e87"
-  },
-  "Elmer Rodriguez": {
-    "gold": "42618a363c407b4e589478a9b9db2139"
+  "Adley Rutschman": {
+    "gold": [
+      "1324ea23c48ff165a6a7d654a500e3f7"
+    ],
+    "diamond": [
+      "b6156a5119ace97d22c359bb84e385b4"
+    ]
   },
   "Willy Adames": {
-    "gold": "8e35b050f27d6e875e34da5b545acf60"
+    "gold": [
+      "8e35b050f27d6e875e34da5b545acf60"
+    ]
   },
   "Matt Chapman": {
-    "gold": "74c33aac10d265ad20adc2464bac3af5"
+    "gold": [
+      "74c33aac10d265ad20adc2464bac3af5"
+    ]
   },
-  "Tommy Kahnle": {
-    "gold": "beaf81811daef995a8a2dd204db87014"
+  "Gregory Soto": {
+    "gold": [
+      "3d07a2a52ec2996a939d11568a374fb8"
+    ]
   },
-  "Guillermo Zu\u00f1iga": {
-    "gold": "e3e1ff7d2908884667e32393caaf6e09"
+  "Jonathan Aranda": {
+    "gold": [
+      "d3c927fcc66b5882e1c49cd27e580781"
+    ]
+  },
+  "Alex Hall": {
+    "gold": [
+      "176996dc8c9879c432173dbb334ca6fe"
+    ]
+  },
+  "Byron Buxton": {
+    "gold": [
+      "bc1803df31e29cfb7e0b388f322f99fa"
+    ],
+    "diamond": [
+      "c6aff446c59619c542634808fa2aed5a"
+    ]
+  },
+  "Vladimir Guerrero Jr.": {
+    "gold": [
+      "3fe940af6daa0433f3a3fdad16441dff"
+    ],
+    "diamond": [
+      "a1743a162c13e95d81f7ffef209f2f52"
+    ]
+  },
+  "Daniel Palencia": {
+    "gold": [
+      "0bfbf00f713e487457682a4b31284d25"
+    ]
   },
   "Iv\u00e1n Herrera": {
-    "gold": "865e9875b2b296281fce03e334a9fee1"
-  },
-  "Erasmo Ram\u00edrez": {
-    "gold": "7d625677d36e37e92aeab50b1f9ec395"
+    "gold": [
+      "865e9875b2b296281fce03e334a9fee1"
+    ]
   },
   "Matt Svanson": {
-    "gold": "9908fbe8edb9e13bef9e83be9c3cc526"
+    "gold": [
+      "9908fbe8edb9e13bef9e83be9c3cc526"
+    ]
+  },
+  "Juremi Profar": {
+    "gold": [
+      "93f3d514bccdcc3dbe343bde626cee44"
+    ]
+  },
+  "Tommy Kahnle": {
+    "gold": [
+      "beaf81811daef995a8a2dd204db87014"
+    ]
   },
   "Hunter Goodman": {
-    "gold": "614f6240bfa6a73eec2e6723d8c55ee8"
+    "gold": [
+      "614f6240bfa6a73eec2e6723d8c55ee8"
+    ]
+  },
+  "Robbie Glendinning": {
+    "gold": [
+      "c97469b27548cf501cb6e54e77941ef4"
+    ]
+  },
+  "Guillermo Zu\u00f1iga": {
+    "gold": [
+      "e3e1ff7d2908884667e32393caaf6e09"
+    ]
+  },
+  "Erasmo Ram\u00edrez": {
+    "gold": [
+      "7d625677d36e37e92aeab50b1f9ec395"
+    ]
   },
   "Jarren Duran": {
-    "gold": "bc720fdae0732122aa881a7ccc78e071",
-    "diamond": "871b3abdcf3c51fb0677673d34956608"
-  },
-  "Bryan Abreu": {
-    "gold": "cce51b3e9feff60ef004d79cfd848221"
-  },
-  "Nathan Eovaldi": {
-    "gold": "68a8bb5178ef1a34a3d2984bafb2f24b"
-  },
-  "Carlos Rod\u00f3n": {
-    "gold": "a14b90828ccad8f026652237f26bb643"
-  },
-  "Steven Kwan": {
-    "gold": "7b9ddc4e5f5cfe04d8121239feb81ed8"
-  },
-  "Spencer Schwellenbach": {
-    "gold": "734e2e393152af7120bdf75d62083343"
-  },
-  "Giancarlo Stanton": {
-    "gold": "5683ba3203ab9329c182852d939d1af3"
-  },
-  "Jes\u00fas Luzardo": {
-    "gold": "9f706a9283a933d9d5ab9092ad3c96fd"
-  },
-  "Jazz Chisholm Jr.": {
-    "gold": "1209a12d553a83990c72d267e96c4c33",
-    "diamond": "3406ef3298c4596818496d574aecf1a6"
-  },
-  "Drake Baldwin": {
-    "gold": "d5e92289fb4f31bbf0279f21ec4d437b"
-  },
-  "Carlos Correa": {
-    "gold": "56784bc9b2976bee33c8360c705b6fc3"
-  },
-  "Riley Greene": {
-    "gold": "dfac371ba3d128f372218dbe91469198"
+    "gold": [
+      "bc720fdae0732122aa881a7ccc78e071"
+    ],
+    "diamond": [
+      "871b3abdcf3c51fb0677673d34956608"
+    ]
   },
   "Yainer Diaz": {
-    "gold": "8ff8c77b8e45721afcaaa4460dcf4260"
+    "gold": [
+      "8ff8c77b8e45721afcaaa4460dcf4260"
+    ]
+  },
+  "Nathan Eovaldi": {
+    "gold": [
+      "68a8bb5178ef1a34a3d2984bafb2f24b"
+    ]
+  },
+  "Carlos Rod\u00f3n": {
+    "gold": [
+      "a14b90828ccad8f026652237f26bb643"
+    ]
   },
   "Vinnie Pasquantino": {
-    "gold": "86eb7145302a8c64a3bd3bcd7e914f9d"
+    "gold": [
+      "86eb7145302a8c64a3bd3bcd7e914f9d"
+    ]
+  },
+  "Jazz Chisholm Jr.": {
+    "gold": [
+      "1209a12d553a83990c72d267e96c4c33"
+    ],
+    "diamond": [
+      "3406ef3298c4596818496d574aecf1a6"
+    ]
+  },
+  "Spencer Schwellenbach": {
+    "gold": [
+      "734e2e393152af7120bdf75d62083343"
+    ]
+  },
+  "Jes\u00fas Luzardo": {
+    "gold": [
+      "9f706a9283a933d9d5ab9092ad3c96fd"
+    ]
+  },
+  "Steven Kwan": {
+    "gold": [
+      "7b9ddc4e5f5cfe04d8121239feb81ed8"
+    ]
+  },
+  "Giancarlo Stanton": {
+    "gold": [
+      "5683ba3203ab9329c182852d939d1af3"
+    ]
   },
   "Maikel Garcia": {
-    "gold": "cbe3a303e631066b82d52b29b20eb0a2",
-    "diamond": "02a6168e7e1d4384f2fe188dfc23d476"
+    "gold": [
+      "cbe3a303e631066b82d52b29b20eb0a2"
+    ],
+    "diamond": [
+      "02a6168e7e1d4384f2fe188dfc23d476"
+    ]
   },
-  "Taylor Ward": {
-    "gold": "ebb59c2a924e567a7e9b0b96d6323b3b"
-  },
-  "Adrian Morejon": {
-    "gold": "24057f9ab80078e56fcdda0b804f3675"
-  },
-  "Jhoan Duran": {
-    "gold": "ad667dc5a1cc6f2018ac3a3f24d0b86f"
+  "Carlos Correa": {
+    "gold": [
+      "56784bc9b2976bee33c8360c705b6fc3"
+    ]
   },
   "Griffin Jax": {
-    "gold": "9208acba78f16430696a76e874662f9f"
+    "gold": [
+      "9208acba78f16430696a76e874662f9f"
+    ]
   },
-  "Rafael Devers": {
-    "gold": "4cd5d752f840a66c41a812b2c87fd1db"
+  "Jhoan Duran": {
+    "gold": [
+      "ad667dc5a1cc6f2018ac3a3f24d0b86f"
+    ]
+  },
+  "Bryan Abreu": {
+    "gold": [
+      "cce51b3e9feff60ef004d79cfd848221"
+    ]
+  },
+  "Riley Greene": {
+    "gold": [
+      "dfac371ba3d128f372218dbe91469198"
+    ]
+  },
+  "Drake Baldwin": {
+    "gold": [
+      "d5e92289fb4f31bbf0279f21ec4d437b"
+    ]
   },
   "Shota Imanaga": {
-    "gold": "1b8ce0094397837f68dc4d5ae6c3ee9d"
+    "gold": [
+      "1b8ce0094397837f68dc4d5ae6c3ee9d"
+    ]
   },
-  "Austin Riley": {
-    "gold": "5f307d6a74257020d77197e84a41d36d"
+  "Adrian Morejon": {
+    "gold": [
+      "24057f9ab80078e56fcdda0b804f3675"
+    ]
+  },
+  "Taylor Ward": {
+    "gold": [
+      "ebb59c2a924e567a7e9b0b96d6323b3b"
+    ]
   },
   "Brandon Woodruff": {
-    "gold": "122bb68ec291f9586cc3f7ef00c16103"
+    "gold": [
+      "122bb68ec291f9586cc3f7ef00c16103"
+    ]
+  },
+  "Rafael Devers": {
+    "gold": [
+      "4cd5d752f840a66c41a812b2c87fd1db"
+    ]
+  },
+  "Austin Riley": {
+    "gold": [
+      "5f307d6a74257020d77197e84a41d36d"
+    ]
   },
   "Brice Turang": {
-    "gold": "59d71a0011e2f064993264b7bad6a83f",
-    "diamond": "5ec1f160346292fccfa97ea915f79af6"
+    "gold": [
+      "59d71a0011e2f064993264b7bad6a83f"
+    ],
+    "diamond": [
+      "5ec1f160346292fccfa97ea915f79af6"
+    ]
   },
   "James Wood": {
-    "gold": "dbaf52c4e1ed94d6c768d532e6444b6f"
+    "gold": [
+      "dbaf52c4e1ed94d6c768d532e6444b6f"
+    ]
   },
   "Elly De La Cruz": {
-    "gold": "8d43736e059f135ffec7a8896370acb4"
+    "gold": [
+      "8d43736e059f135ffec7a8896370acb4"
+    ]
   },
   "Wyatt Langford": {
-    "gold": "a7c8e0d6c87c6da043fd2c6882b0a85e"
-  },
-  "Gerrit Cole": {
-    "gold": "c15f24dff39ce1ccff4dc7a91dbafcf4"
-  },
-  "Nick Pivetta": {
-    "gold": "a2d216e4160586dcd27adae34d660a36"
-  },
-  "George Kirby": {
-    "gold": "0b5abf160b4870d1517be60e7c50a337"
+    "gold": [
+      "a7c8e0d6c87c6da043fd2c6882b0a85e"
+    ]
   },
   "Josh Naylor": {
-    "gold": "09cc3cf3a69b52dd327484b410a76050",
-    "diamond": "76b20a86e777d7d268b66eff98b9b009"
-  },
-  "Andy Pages": {
-    "gold": "28f604e21ac1964af3f09ed7ce811a6c"
+    "gold": [
+      "09cc3cf3a69b52dd327484b410a76050"
+    ],
+    "diamond": [
+      "76b20a86e777d7d268b66eff98b9b009"
+    ]
   },
   "Raisel Iglesias": {
-    "gold": "14c0a6aff756924f7a829d941d35992c"
+    "gold": [
+      "14c0a6aff756924f7a829d941d35992c"
+    ]
+  },
+  "Nick Pivetta": {
+    "gold": [
+      "a2d216e4160586dcd27adae34d660a36"
+    ]
   },
   "Geraldo Perdomo": {
-    "gold": "2202836a6595b48e61f9c0f063ec5390",
-    "diamond": "f29963720bd344f248b73e0876055828"
+    "gold": [
+      "2202836a6595b48e61f9c0f063ec5390"
+    ],
+    "diamond": [
+      "f29963720bd344f248b73e0876055828"
+    ]
   },
-  "Matt Olson": {
-    "gold": "b8ada8e4493b418f275d040d62ab7c8f"
+  "Andy Pages": {
+    "gold": [
+      "28f604e21ac1964af3f09ed7ce811a6c"
+    ]
+  },
+  "Gerrit Cole": {
+    "gold": [
+      "c15f24dff39ce1ccff4dc7a91dbafcf4"
+    ]
   },
   "Jos\u00e9 Altuve": {
-    "gold": "effe2ba20c0c40fc4887e6b536c3639c"
+    "gold": [
+      "effe2ba20c0c40fc4887e6b536c3639c"
+    ]
+  },
+  "George Kirby": {
+    "gold": [
+      "0b5abf160b4870d1517be60e7c50a337"
+    ]
+  },
+  "Matt Olson": {
+    "gold": [
+      "b8ada8e4493b418f275d040d62ab7c8f"
+    ]
   },
   "Alejandro Kirk": {
-    "gold": "01d3a492b101d1248e94f1e6849b8fbd"
-  },
-  "Eugenio Su\u00e1rez": {
-    "gold": "8cb6ef3efa9fdef784ece7cb0bfe292f",
-    "diamond": "b39c198cd2053380dd48fb0584fe7d11"
+    "gold": [
+      "01d3a492b101d1248e94f1e6849b8fbd"
+    ]
   },
   "Zach Neto": {
-    "gold": "5451cf8b33e3895bc038ac427478d907"
+    "gold": [
+      "5451cf8b33e3895bc038ac427478d907"
+    ]
   },
-  "Yandy D\u00edaz": {
-    "gold": "1baa8f3043c881ac39373bebaad2e452"
+  "Eugenio Su\u00e1rez": {
+    "gold": [
+      "8cb6ef3efa9fdef784ece7cb0bfe292f"
+    ],
+    "diamond": [
+      "b39c198cd2053380dd48fb0584fe7d11"
+    ]
   },
   "Christian Yelich": {
-    "gold": "c84d7642d063256592a3521bd64d20af"
+    "gold": [
+      "c84d7642d063256592a3521bd64d20af"
+    ]
+  },
+  "Yandy D\u00edaz": {
+    "gold": [
+      "1baa8f3043c881ac39373bebaad2e452"
+    ]
   },
   "Shea Langeliers": {
-    "gold": "241da8ad0157174daeea6b5264bce215"
+    "gold": [
+      "241da8ad0157174daeea6b5264bce215"
+    ]
   },
-  "Jos\u00e9 Caballero": {
-    "diamond": "1a5f89abde1688b1a0b47beaa8c4f780"
+  "Yu Chang": {
+    "gold": [
+      "060cf39a4b98cf136e75c699751e8454"
+    ]
   },
-  "Kyle Teel": {
-    "diamond": "43710de8123113bc12d7ce2c96da825b"
+  "Bo Bichette": {
+    "gold": [
+      "df54709556e526558a05bd4825bc73c9"
+    ]
+  },
+  "George Springer": {
+    "gold": [
+      "3ad82b308c619a30af8f7ed3428417d0"
+    ]
+  },
+  "Jackson Merrill": {
+    "gold": [
+      "c947f75a502b342295c8fcf68d5b9590"
+    ]
+  },
+  "Cade Smith": {
+    "gold": [
+      "ad61e144abe6cd16d8132eb82b26d44d"
+    ]
+  },
+  "Brent Rooker": {
+    "gold": [
+      "326429edc16a998e0a3020886cca8891"
+    ]
+  },
+  "William Contreras": {
+    "gold": [
+      "0e07052fd941f0ae83ddf986fbff60fe"
+    ]
+  },
+  "Logan Webb": {
+    "gold": [
+      "1db8c408ccc6a61a8d65f43b8754549e"
+    ],
+    "diamond": [
+      "1ca21fc13eff71d412d25d41c49770d9"
+    ]
+  },
+  "Dean Kremer": {
+    "gold": [
+      "fdb80e16fd9eaa34ef2d0da459fbfe1c"
+    ]
+  },
+  "Hyeseong Kim": {
+    "gold": [
+      "d53cce1d17f9f52f4caf85f74e7d1844"
+    ]
+  },
+  "Jackson Chourio": {
+    "gold": [
+      "76ef7e9d2fac836db23a76579f733024"
+    ]
+  },
+  "Manny Machado": {
+    "gold": [
+      "873258db6ddfd30f022361e1cf3b09a6"
+    ],
+    "diamond": [
+      "453321beaa5d602172c9bdcd725e744f"
+    ]
+  },
+  "Joe Ryan": {
+    "gold": [
+      "a1a576f02d863b09d77a7ceeb79592fb"
+    ]
+  },
+  "Seiya Suzuki": {
+    "gold": [
+      "a48d1f88c8987e5df2c5919f3aace0aa"
+    ]
+  },
+  "Freddy Peralta": {
+    "gold": [
+      "4810434f5afe99779e49cdae6b76537d"
+    ]
+  },
+  "Andr\u00e9s Mu\u00f1oz": {
+    "gold": [
+      "f40d34d36b7103d1b0cc8cef6b2bb9c6"
+    ],
+    "diamond": [
+      "13153e488e46cab54a62525a179cafa0"
+    ]
+  },
+  "Nico Hoerner": {
+    "gold": [
+      "db27a6583a1b0eefbc2ae6cc4f6cbcb9"
+    ]
+  },
+  "Alex Bregman": {
+    "gold": [
+      "f0ebd4c4328c1f69f801e892110647ee"
+    ]
+  },
+  "Joey Meneses": {
+    "gold": [
+      "376175f2c2a7f86d5b164114132802fc"
+    ]
+  },
+  "Cristopher S\u00e1nchez": {
+    "gold": [
+      "3e6f045aba05631c48da29aacc9b6261"
+    ]
+  },
+  "Camilo Doval": {
+    "gold": [
+      "9ab261d0729c6ef94a362e1f6e75dcc6"
+    ]
+  },
+  "Matt Davidson": {
+    "gold": [
+      "fcdcf5c3f65ca71f64e1a77b401d9e87"
+    ]
+  },
+  "Elmer Rodriguez": {
+    "gold": [
+      "42618a363c407b4e589478a9b9db2139"
+    ]
+  },
+  "Seranthony Dom\u00ednguez": {
+    "gold": [
+      "55fb77566aba38ade96f2da28aae64d1"
+    ]
+  },
+  "Brayan Bello": {
+    "gold": [
+      "79ec96dacdb53fcbc78cb826f9620c04"
+    ]
   },
   "Ondrej Satoria": {
-    "diamond": "219c2f239b547fac60d3f8cbe51f830c"
-  },
-  "Jos\u00e9 Quintana": {
-    "diamond": "76de6b45292f7cf130cdc858059e8099"
-  },
-  "Luis Severino": {
-    "diamond": "5b19c15c089a2e67ac35645cf9d06203"
+    "diamond": [
+      "219c2f239b547fac60d3f8cbe51f830c"
+    ]
   },
   "Dante Nori": {
-    "diamond": "98211ac8ccf82097725afa9afa1f166d"
+    "diamond": [
+      "98211ac8ccf82097725afa9afa1f166d"
+    ]
   },
-  "Najer Victor": {
-    "diamond": "e3ab66f697e7d9ce7e390c2b69476962"
+  "Luis Arraez": {
+    "diamond": [
+      "7ae0e0627c217a5ad5b7d240acf7d28a"
+    ]
   },
   "Aaron Nola": {
-    "diamond": "1ab6bf426a430a0426841a29c507e3ff"
+    "diamond": [
+      "1ab6bf426a430a0426841a29c507e3ff"
+    ]
+  },
+  "Kyle Teel": {
+    "diamond": [
+      "43710de8123113bc12d7ce2c96da825b"
+    ]
   },
   "Sam Antonacci": {
-    "diamond": "c3e4263fc3261b334c5d2688ec71b914"
+    "diamond": [
+      "c3e4263fc3261b334c5d2688ec71b914"
+    ]
+  },
+  "Jos\u00e9 Quintana": {
+    "diamond": [
+      "76de6b45292f7cf130cdc858059e8099"
+    ]
+  },
+  "Willson Contreras": {
+    "diamond": [
+      "371e662f8f8f50d323f82efedcc6e34f"
+    ]
+  },
+  "Jos\u00e9 Caballero": {
+    "diamond": [
+      "1a5f89abde1688b1a0b47beaa8c4f780"
+    ]
+  },
+  "Najer Victor": {
+    "diamond": [
+      "e3ab66f697e7d9ce7e390c2b69476962"
+    ]
+  },
+  "Heliot Ramos": {
+    "diamond": [
+      "489539658dd9503c57c8da8435fe1eb5"
+    ]
+  },
+  "Luis Severino": {
+    "diamond": [
+      "5b19c15c089a2e67ac35645cf9d06203"
+    ]
   },
   "Harrison Cohen": {
-    "diamond": "bec54d7c0cb2db98888e5bcc40d2a44e"
+    "diamond": [
+      "bec54d7c0cb2db98888e5bcc40d2a44e"
+    ]
   },
   "Eddie Mathews": {
-    "diamond": "a3e2af6b28600e2ecb0db7de0ac6c04b"
-  },
-  "James McCann": {
-    "diamond": "5bc6a088d976baf3bf6020eb2d6db9f4"
-  },
-  "Whitey Ford": {
-    "diamond": "3b759b0d9e3fba4f99ce144809b75966"
-  },
-  "Bobby Grich": {
-    "diamond": "de0b14d910be110526f35d9f7a38041e"
+    "diamond": [
+      "a3e2af6b28600e2ecb0db7de0ac6c04b"
+    ]
   },
   "Ketel Marte": {
-    "diamond": "a3b52fd737cde5a076ca32fe854d623d"
+    "diamond": [
+      "eaaed6e17525f329fef14fedcf0904d4",
+      "a3b52fd737cde5a076ca32fe854d623d"
+    ]
   },
-  "Max Fried": {
-    "diamond": "82d1c9e6172d124fcfbdbec2a7d17348"
+  "James McCann": {
+    "diamond": [
+      "5bc6a088d976baf3bf6020eb2d6db9f4"
+    ]
+  },
+  "Whitey Ford": {
+    "diamond": [
+      "3b759b0d9e3fba4f99ce144809b75966"
+    ]
+  },
+  "Ryan O'Hearn": {
+    "diamond": [
+      "5b0a8589d88ae8b04f7ae55ce11478d3"
+    ]
+  },
+  "Xander Bogaerts": {
+    "diamond": [
+      "dcffed0b00282a280291d9989c3e635b"
+    ]
+  },
+  "Bobby Grich": {
+    "diamond": [
+      "de0b14d910be110526f35d9f7a38041e"
+    ]
+  },
+  "Gleyber Torres": {
+    "diamond": [
+      "7f860f0ae8119616cccb650124f80085"
+    ]
+  },
+  "Kazuma Okamoto": {
+    "diamond": [
+      "dda8522397f45fe7f8ff73f79f287087"
+    ]
   },
   "Will Smith": {
-    "diamond": "61b078d620838115e4c26a47b0ec3891"
+    "diamond": [
+      "1b616b1975b67c3b629bfc7922836f85",
+      "61b078d620838115e4c26a47b0ec3891"
+    ]
+  },
+  "Max Fried": {
+    "diamond": [
+      "82d1c9e6172d124fcfbdbec2a7d17348"
+    ]
   },
   "Hunter Brown": {
-    "diamond": "f82547a84fd9889dfe639979b0d7c183"
+    "diamond": [
+      "f82547a84fd9889dfe639979b0d7c183"
+    ]
   },
   "Cal Raleigh": {
-    "diamond": "81608f307e2567a6ee1c7b68f7ff22bf"
+    "diamond": [
+      "81608f307e2567a6ee1c7b68f7ff22bf"
+    ]
   },
   "Francisco Lindor": {
-    "diamond": "441dea2f123999e0b4cc292c6d26f1c2"
+    "diamond": [
+      "441dea2f123999e0b4cc292c6d26f1c2"
+    ]
   },
   "Tarik Skubal": {
-    "diamond": "c2d9aeefe0257a97dc39aca5818aa47d"
+    "diamond": [
+      "c2d9aeefe0257a97dc39aca5818aa47d"
+    ]
   },
   "Mike Trout": {
-    "diamond": "4367cd34edcbc778626726e9fee421c9"
+    "diamond": [
+      "cbc5dd546069c2e9d92eda1ab341fe22",
+      "4367cd34edcbc778626726e9fee421c9"
+    ]
   },
   "Juan Soto": {
-    "diamond": "d38565a6cd5e06a98a5095ca9479044e"
+    "diamond": [
+      "d38565a6cd5e06a98a5095ca9479044e"
+    ]
   },
   "Paul Skenes": {
-    "diamond": "b4d18dfeb0c12adad6c47445f70984fb"
-  },
-  "Jos\u00e9 Ram\u00edrez": {
-    "diamond": "81de8b3d6f3f39a13a8a6c055a895774"
+    "diamond": [
+      "b4d18dfeb0c12adad6c47445f70984fb"
+    ]
   },
   "Bobby Witt Jr.": {
-    "diamond": "afa11f4e20979224d5cbf8ccd4764ad4"
+    "diamond": [
+      "afa11f4e20979224d5cbf8ccd4764ad4"
+    ]
+  },
+  "Jos\u00e9 Ram\u00edrez": {
+    "diamond": [
+      "81de8b3d6f3f39a13a8a6c055a895774"
+    ]
   },
   "Aaron Judge": {
-    "diamond": "7bbdb0a92290fab71ee9cb58f7676471"
+    "diamond": [
+      "3b561bcca8749f3fd17c99d863a95c2e",
+      "7bbdb0a92290fab71ee9cb58f7676471"
+    ]
   },
   "Shohei Ohtani": {
-    "diamond": "8c0b39e497ed9778ac3672a68d4571f2"
+    "diamond": [
+      "81fb5e540ef2220e9a66f8441ba750b3",
+      "8c0b39e497ed9778ac3672a68d4571f2"
+    ]
   },
   "Jeremy Pe\u00f1a": {
-    "diamond": "f31502fea91eab9d92cb62698d84665d"
-  },
-  "Chipper Jones": {
-    "diamond": "fb64c519c86a16332cc9b50287744724"
-  },
-  "Stan Musial": {
-    "diamond": "ad0fd9e615c3fd9e9baa80658adff11e"
+    "diamond": [
+      "f31502fea91eab9d92cb62698d84665d"
+    ]
   },
   "Raidel Martinez": {
-    "diamond": "bffa732b48a0dedd9ca13ab24e40b076"
+    "diamond": [
+      "bffa732b48a0dedd9ca13ab24e40b076"
+    ]
   },
   "Tyler Glasnow": {
-    "diamond": "ea70a26946216400e510f020a5d1b05a"
+    "diamond": [
+      "ea70a26946216400e510f020a5d1b05a"
+    ]
+  },
+  "Chipper Jones": {
+    "diamond": [
+      "fb64c519c86a16332cc9b50287744724"
+    ]
   },
   "Edwin D\u00edaz": {
-    "diamond": "4b62f838c8200a9212849764f77ba711"
-  },
-  "Roy Halladay": {
-    "diamond": "a429fbe59173826c21461c2e56f34f76"
-  },
-  "Ken Griffey Jr.": {
-    "diamond": "8cbee94e434c4b7e5ac051bc2f9242ca"
-  },
-  "Jacob Wilson": {
-    "diamond": "bed526483e6b50d74ea9662c8d733058"
-  },
-  "Logan Gilbert": {
-    "diamond": "f964baed9bc9821e707706ec15457b63"
-  },
-  "Bob Feller": {
-    "diamond": "85e90d7a758786bb9a13967f98749946"
+    "diamond": [
+      "92fe82b80e8cd62471fb3b42d2deea59",
+      "4b62f838c8200a9212849764f77ba711"
+    ]
   },
   "Willi Castro": {
-    "diamond": "130c6294264c69d8117cd513b88432ce"
+    "diamond": [
+      "130c6294264c69d8117cd513b88432ce"
+    ]
   },
-  "Yo\u00e1n Moncada": {
-    "diamond": "d4c9a5a2df560fc94c20b4808c3644e4"
-  },
-  "Michael Lorenzen": {
-    "diamond": "d0d80ab388ea31685a801eab7303e45d"
-  },
-  "Nate Eaton": {
-    "diamond": "18b95c211affb2cc126801fc178f93b7"
+  "Stan Musial": {
+    "diamond": [
+      "ad0fd9e615c3fd9e9baa80658adff11e"
+    ]
   },
   "Blake Snell": {
-    "diamond": "04955f5133f9e556732100712a7883c9"
-  },
-  "Stuart Fairchild": {
-    "diamond": "ea417dd342d3349c4a8e4a724b51cde3"
-  },
-  "Kyle Schwarber": {
-    "diamond": "80d46ef9f2a05e4ee0f92e288cab66d4"
-  },
-  "Pete Alonso": {
-    "diamond": "e4d9079b5e20bb24f19512cedc3f5d9a"
+    "diamond": [
+      "04955f5133f9e556732100712a7883c9"
+    ]
   },
   "Corbin Carroll": {
-    "diamond": "1b00e5365443ddb9d6154f58f65719c1"
+    "diamond": [
+      "1b00e5365443ddb9d6154f58f65719c1"
+    ]
   },
-  "Oneil Cruz": {
-    "diamond": "b117a9c674bd1db26548a486cfd3f7c8"
+  "Wilyer Abreu": {
+    "diamond": [
+      "28edce15789eceb747d4d2f13b7aefdd"
+    ]
+  },
+  "Stuart Fairchild": {
+    "diamond": [
+      "ea417dd342d3349c4a8e4a724b51cde3"
+    ]
+  },
+  "Nate Eaton": {
+    "diamond": [
+      "18b95c211affb2cc126801fc178f93b7"
+    ]
+  },
+  "Tyler O'Neill": {
+    "diamond": [
+      "ded3916224a466cc6ff73aa27c765ba8"
+    ]
+  },
+  "Nolan McLean": {
+    "diamond": [
+      "45aa2ba3061d40614a3600ca4c4c9a37"
+    ]
   },
   "Clay Holmes": {
-    "diamond": "0ad4523f6448e80a6fe37eef0769f4e6"
+    "diamond": [
+      "0ad4523f6448e80a6fe37eef0769f4e6"
+    ]
+  },
+  "Logan Gilbert": {
+    "diamond": [
+      "f964baed9bc9821e707706ec15457b63"
+    ]
+  },
+  "Roy Halladay": {
+    "diamond": [
+      "a429fbe59173826c21461c2e56f34f76"
+    ]
+  },
+  "Michael Lorenzen": {
+    "diamond": [
+      "d0d80ab388ea31685a801eab7303e45d"
+    ]
+  },
+  "Ken Griffey Jr.": {
+    "diamond": [
+      "8cbee94e434c4b7e5ac051bc2f9242ca"
+    ]
+  },
+  "Yo\u00e1n Moncada": {
+    "diamond": [
+      "d4c9a5a2df560fc94c20b4808c3644e4"
+    ]
+  },
+  "Jacob Wilson": {
+    "diamond": [
+      "bed526483e6b50d74ea9662c8d733058"
+    ]
+  },
+  "Pete Alonso": {
+    "diamond": [
+      "e4d9079b5e20bb24f19512cedc3f5d9a"
+    ]
+  },
+  "Bob Feller": {
+    "diamond": [
+      "85e90d7a758786bb9a13967f98749946"
+    ]
+  },
+  "Kyle Schwarber": {
+    "diamond": [
+      "e87779b13df51d69b13e127eacb0bedb",
+      "80d46ef9f2a05e4ee0f92e288cab66d4"
+    ]
+  },
+  "Oneil Cruz": {
+    "diamond": [
+      "b117a9c674bd1db26548a486cfd3f7c8"
+    ]
   },
   "Bryan Woo": {
-    "diamond": "d7f5f7095c9774ce7955dbe0e8078b1e"
-  },
-  "Yoshinobu Yamamoto": {
-    "diamond": "b43c5df5574f3a06122fff41e9ff634b"
-  },
-  "Jacob deGrom": {
-    "diamond": "84a623a0cb516e0c31a8535e0f40a564"
+    "diamond": [
+      "d7f5f7095c9774ce7955dbe0e8078b1e"
+    ]
   },
   "Freddie Freeman": {
-    "diamond": "b304748509db213a30a08c2c0b3eba5b"
+    "diamond": [
+      "b304748509db213a30a08c2c0b3eba5b"
+    ]
   },
-  "Julio Rodr\u00edguez": {
-    "diamond": "6140bef83c36741aaf6ee0eaf588258a"
-  },
-  "Junior Caminero": {
-    "diamond": "1fef9735e1e801ef78c291c5dcd50081"
-  },
-  "Nick Kurtz": {
-    "diamond": "b8911a280a08239f0e5e352d3efb18a5"
-  },
-  "Wade Boggs": {
-    "diamond": "94795ae845d549e4aa6bf9bf7fbe70c1"
-  },
-  "Adam Dunn": {
-    "diamond": "322fb687853d2ab4d3298efd7d9aa686"
-  },
-  "Kensuke Kondoh": {
-    "diamond": "f2994eb08dae9747015be8b5969a5448"
-  },
-  "Jes\u00fas Made": {
-    "diamond": "b82297654b90adbafdd9264ae5ee1163"
+  "Yoshinobu Yamamoto": {
+    "diamond": [
+      "ef9d289e44d42596ed4359c14332873b",
+      "b43c5df5574f3a06122fff41e9ff634b"
+    ]
   },
   "Harry Ford": {
-    "diamond": "4cafcd48ac7160fa926a49135f0b5084"
+    "diamond": [
+      "4cafcd48ac7160fa926a49135f0b5084"
+    ]
   },
-  "Franklin Arias": {
-    "diamond": "60f7a03623246c029f50a8c4b7003bbe"
+  "Jacob deGrom": {
+    "diamond": [
+      "84a623a0cb516e0c31a8535e0f40a564"
+    ]
   },
-  "JJ Wetherholt": {
-    "diamond": "3e146c29c10b81db03db211a9bc8f3c3"
+  "Kensuke Kondoh": {
+    "diamond": [
+      "f2994eb08dae9747015be8b5969a5448"
+    ]
   },
-  "Rainiel Rodriguez": {
-    "diamond": "a9185a258e8bc489fc4115896e6b776f"
+  "Nick Kurtz": {
+    "diamond": [
+      "b8911a280a08239f0e5e352d3efb18a5"
+    ]
   },
-  "Eli Willits": {
-    "diamond": "95330eb7e954cdeed7fd37b81c0a85da"
+  "Junior Caminero": {
+    "diamond": [
+      "5f74a86f361c5124d1ef06cbabad638e",
+      "1fef9735e1e801ef78c291c5dcd50081"
+    ]
   },
-  "Charlie Condon": {
-    "diamond": "8e30e079501785144f8c1423b4a786cc"
+  "Wade Boggs": {
+    "diamond": [
+      "94795ae845d549e4aa6bf9bf7fbe70c1"
+    ]
   },
-  "Ryan Sloan": {
-    "diamond": "b6148a45d591e65fee6e3b08c9573817"
+  "Adam Dunn": {
+    "diamond": [
+      "322fb687853d2ab4d3298efd7d9aa686"
+    ]
   },
-  "Michael Arroyo": {
-    "diamond": "98e9958f7cc1460b84db83183aef7f73"
+  "Kyle Finnegan": {
+    "diamond": [
+      "83fe18dc984c3fb82de72075332e525a"
+    ]
+  },
+  "Julio Rodr\u00edguez": {
+    "diamond": [
+      "1146aaa38bcba7416022ada8c56d3305",
+      "6140bef83c36741aaf6ee0eaf588258a"
+    ]
   },
   "Jamie Arnold": {
-    "diamond": "9352debab68249703ffe4b9ed4104477"
+    "diamond": [
+      "9352debab68249703ffe4b9ed4104477"
+    ]
   },
-  "Kade Anderson": {
-    "diamond": "4afa0d2b127c6779bfec904f052d1345"
+  "Eli Willits": {
+    "diamond": [
+      "95330eb7e954cdeed7fd37b81c0a85da"
+    ]
   },
-  "Lazaro Montes": {
-    "diamond": "f99993fae388bfdceac718d37de43927"
-  },
-  "Max Clark": {
-    "diamond": "2ac9ebc51afdc8c3369576d291b92f17"
+  "Ryan Sloan": {
+    "diamond": [
+      "b6148a45d591e65fee6e3b08c9573817"
+    ]
   },
   "Trea Turner": {
-    "diamond": "631a482b4782dbeeab734790390537f8"
+    "diamond": [
+      "631a482b4782dbeeab734790390537f8"
+    ]
   },
-  "Bo-gyeong Moon": {
-    "diamond": "7ad75a202714975c1d326025897f1fcb"
+  "Charlie Condon": {
+    "diamond": [
+      "8e30e079501785144f8c1423b4a786cc"
+    ]
   },
-  "Hunter Greene": {
-    "diamond": "ddf55cbd78a6380987e0bdedc5caa6f0"
+  "Michael Arroyo": {
+    "diamond": [
+      "98e9958f7cc1460b84db83183aef7f73"
+    ]
   },
-  "Kyle Tucker": {
-    "diamond": "058a4620bad7fed4f960e229d5e698fd"
+  "Kade Anderson": {
+    "diamond": [
+      "4afa0d2b127c6779bfec904f052d1345"
+    ]
   },
-  "Bryce Harper": {
-    "diamond": "7a37a325c1569e003daae1d9b21ac07e"
-  },
-  "Pete Crow-Armstrong": {
-    "diamond": "7b56ce7c39ffbcfbe93897adc42bd130"
-  },
-  "Fernando Tatis Jr.": {
-    "diamond": "a069b168f88af2884a73d1840413d6f3"
-  },
-  "Cody Bellinger": {
-    "diamond": "a32b2001f7c59f26fe9dfb045285bc72"
-  },
-  "Mookie Betts": {
-    "diamond": "f51845d75a9d8a8b7386865edf940dd0"
-  },
-  "Leo De Vries": {
-    "diamond": "77f4f726f0b03e6c0591c3c48dc5f714"
+  "Lazaro Montes": {
+    "diamond": [
+      "f99993fae388bfdceac718d37de43927"
+    ]
   },
   "Josh Hader": {
-    "diamond": "eaa4cb7aa0e1b4f890c927c9ceb7066e"
+    "diamond": [
+      "eaa4cb7aa0e1b4f890c927c9ceb7066e"
+    ]
   },
-  "Eddie Rosario": {
-    "diamond": "dea507a3547c0992934802068d961d8d"
-  },
-  "Zack Wheeler": {
-    "diamond": "cb4514ef8ca935c93a2c0e8ddc86f022"
-  },
-  "Chris Sale": {
-    "diamond": "865aa00e7873e44460a67f36111c3251"
+  "Leo De Vries": {
+    "diamond": [
+      "77f4f726f0b03e6c0591c3c48dc5f714"
+    ]
   },
   "Gunnar Henderson": {
-    "diamond": "6b50bb288b06d3e5f5652b9662116d51"
+    "diamond": [
+      "6b50bb288b06d3e5f5652b9662116d51"
+    ]
+  },
+  "Chris Sale": {
+    "diamond": [
+      "865aa00e7873e44460a67f36111c3251"
+    ]
+  },
+  "Zack Wheeler": {
+    "diamond": [
+      "cb4514ef8ca935c93a2c0e8ddc86f022"
+    ]
+  },
+  "Roman Anthony": {
+    "diamond": [
+      "6d2a46efca22ab816e44a3cd71b707ca"
+    ]
   },
   "Ronald Acu\u00f1a Jr.": {
-    "diamond": "31949b45b3dc7ec832527e4a89290666"
+    "diamond": [
+      "ae909975cc613d0d8aad0cae4414e3c4",
+      "31949b45b3dc7ec832527e4a89290666"
+    ]
   },
   "Carlos Santana": {
-    "diamond": "4cd96c43cd52cb8635059c29ddcc6092"
+    "diamond": [
+      "4cd96c43cd52cb8635059c29ddcc6092"
+    ]
   },
   "Yordan Alvarez": {
-    "diamond": "a2cf05c2150d3dda2494039ecb9208bf"
+    "diamond": [
+      "a2cf05c2150d3dda2494039ecb9208bf"
+    ]
   },
   "Garrett Crochet": {
-    "diamond": "581a806eb67f2c7cda9dc285a6cb8536"
-  },
-  "Aroldis Chapman": {
-    "diamond": "1ab73eafe2845f50ae119f3af6cbadbb"
+    "diamond": [
+      "581a806eb67f2c7cda9dc285a6cb8536"
+    ]
   },
   "Mason Miller": {
-    "diamond": "968cd58ad7d5b41c05d106e4159b50d5"
+    "diamond": [
+      "968cd58ad7d5b41c05d106e4159b50d5"
+    ]
+  },
+  "Munetaka Murakami": {
+    "diamond": [
+      "694e6aa24631c7eafa5cc17da782e0c8"
+    ]
+  },
+  "Aroldis Chapman": {
+    "diamond": [
+      "1ab73eafe2845f50ae119f3af6cbadbb"
+    ]
   },
   "Corey Seager": {
-    "diamond": "2608e6125f7270ce6a60fbb84025286b"
+    "diamond": [
+      "2608e6125f7270ce6a60fbb84025286b"
+    ]
   },
   "Clayton Kershaw": {
-    "diamond": "91bedcc283ad42858feb529883901ee2"
+    "diamond": [
+      "91bedcc283ad42858feb529883901ee2"
+    ]
+  },
+  "Max Clark": {
+    "diamond": [
+      "2ac9ebc51afdc8c3369576d291b92f17"
+    ]
+  },
+  "Franklin Arias": {
+    "diamond": [
+      "60f7a03623246c029f50a8c4b7003bbe"
+    ]
+  },
+  "JJ Wetherholt": {
+    "diamond": [
+      "3e146c29c10b81db03db211a9bc8f3c3"
+    ]
+  },
+  "Rainiel Rodriguez": {
+    "diamond": [
+      "a9185a258e8bc489fc4115896e6b776f"
+    ]
+  },
+  "Jes\u00fas Made": {
+    "diamond": [
+      "b82297654b90adbafdd9264ae5ee1163"
+    ]
+  },
+  "Bo-gyeong Moon": {
+    "diamond": [
+      "7ad75a202714975c1d326025897f1fcb"
+    ]
+  },
+  "Bryce Harper": {
+    "diamond": [
+      "7a37a325c1569e003daae1d9b21ac07e"
+    ]
+  },
+  "Pete Crow-Armstrong": {
+    "diamond": [
+      "7b56ce7c39ffbcfbe93897adc42bd130"
+    ]
+  },
+  "Hunter Greene": {
+    "diamond": [
+      "ddf55cbd78a6380987e0bdedc5caa6f0"
+    ]
+  },
+  "Kyle Tucker": {
+    "diamond": [
+      "058a4620bad7fed4f960e229d5e698fd"
+    ]
+  },
+  "Fernando Tatis Jr.": {
+    "diamond": [
+      "a069b168f88af2884a73d1840413d6f3"
+    ]
+  },
+  "Salvador Perez": {
+    "diamond": [
+      "d6b54c75e6ff3386283234650d57870b"
+    ]
+  },
+  "Mookie Betts": {
+    "diamond": [
+      "f51845d75a9d8a8b7386865edf940dd0"
+    ]
+  },
+  "Cody Bellinger": {
+    "diamond": [
+      "a32b2001f7c59f26fe9dfb045285bc72"
+    ]
+  },
+  "Eddie Rosario": {
+    "diamond": [
+      "dea507a3547c0992934802068d961d8d"
+    ]
   }
 }

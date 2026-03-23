@@ -32,6 +32,7 @@ COORD_DEFS = {
         ("BTN_MKT_SILVER_FROM_GOLD", "Silver option when currently filtered to GOLD"),
         ("BTN_MKT_DIAMOND_FROM_GOLD", "Diamond option when currently filtered to GOLD"),
         ("BTN_MKT_SILVER_FROM_DIAMOND", "Silver option when currently filtered to DIAMOND"),
+        ("BTN_MKT_GOLD_FROM_DIAMOND", "Gold option when currently filtered to DIAMOND"),
         ("BTN_MKT_FILTER_CLOSE_RARITY", "Close rarity dropdown"),
         ("BTN_MKT_FILTER_SHOW", "Show results button"),
     ],
@@ -72,6 +73,14 @@ COORD_DEFS = {
     ],
     "sellability_checks": [
         ("MENU_BTN_CHECK", "Menu button (three dots) on card page — for sellability check"),
+        ("CARD_PRICE_BOX_TL", "Top buy price on card page — TOP LEFT corner"),
+        ("CARD_PRICE_BOX_BR", "Top buy price on card page — BOTTOM RIGHT corner"),
+    ],
+    "deep_pockets_filter": [
+        ("BTN_DP_FILTER_OVR_SECTION", "OVR section in inventory filter panel"),
+        ("BTN_DP_FILTER_OVR_NUMBER", "OVR number picker (swipe up here to increase)"),
+        ("BTN_DP_FILTER_OVR_80", "Click position for 80 after scrolling the picker"),
+        ("BTN_DP_FILTER_OVR_CONFIRM", "Confirm/apply button after setting OVR number"),
     ],
     "scroll": [
         ("SCROLL_DOWN_START", "Inventory scroll down — START (near bottom cards)"),
