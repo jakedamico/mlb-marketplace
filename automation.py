@@ -1,9 +1,10 @@
 """
 MLB The Show 26 - Android Emulator Buy Automation
-    print(EMU_WARNING)
 
-Pure coordinate-based automation for MuMu Android emulator.
-Uses ADB for text input, pyautogui for clicks, OCR for stubs and card matching.
+ADB-based automation for MuMu Android emulator.
+All screen interaction via ADB — runs headless without a visible display.
+Uses ADB for taps, swipes, text input, and screenshots.
+OCR via Tesseract on ADB screenshots.
 
 Flow:
   1. Clear any active buy orders
@@ -13,17 +14,16 @@ Flow:
   5. Stop when stubs < 150
 """
 
-import ctypes
 import json
 import os
 import subprocess
 import time
 import unicodedata
-import pyautogui
-from PIL import Image, ImageGrab
+from PIL import Image
 import pytesseract
 
 from api import fetch_single_listing, load_blacklist
+import adb_screen
 
 # ─── Tesseract path (Windows) ─────────────────────────────────────────────
 
@@ -38,13 +38,10 @@ MIN_STUBS_GOLD = 3000
 MIN_STUBS_DIAMOND = 10000
 CANCEL_ORDER_COLOR = "fd5900"
 ADB_DEVICE = "127.0.0.1:7555"
-EMU_WARNING = "  ⚠ Emulator must be 1600x900 @ 240 DPI for coordinates to work."
+EMU_WARNING = "  ⚠ Emulator coordinates must be calibrated for ADB internal resolution."
 
 # Auto-connect ADB on import
-subprocess.run(
-    ["adb", "connect", ADB_DEVICE],
-    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-)
+adb_screen.adb_connect()
 
 # Track current marketplace filter state (always starts at silver)
 _mkt_filter_state = "silver"
@@ -183,15 +180,15 @@ _cpbr = _c("CARD_PRICE_BOX_BR", (-559, 914))
 CARD_PRICE_BOX = (*_cptl, *_cpbr)
 PRICE_MATCH_TOLERANCE = 0.15  # 15% — enough for sync drift, distinct enough for dupes
 
-# Order result popup — fades in/out at y=177
+# Order result popup — scans for green/red at y=149 (ADB coords)
 # Green (4caf50) = success, Red (f44336) = failed
-ORDER_POPUP_Y = 177
+ORDER_POPUP_Y = 149
 ORDER_POPUP_GREEN = (0x4c, 0xaf, 0x50)
 ORDER_POPUP_RED = (0xf4, 0x43, 0x36)
 ORDER_POPUP_TOLERANCE = 10
-ORDER_POPUP_SCAN_X_START = -900
-ORDER_POPUP_SCAN_X_END = -100
-ORDER_POPUP_SCAN_STEP = 20
+ORDER_POPUP_SCAN_X_START = 150
+ORDER_POPUP_SCAN_X_END = 816
+ORDER_POPUP_SCAN_STEP = 17
 ORDER_POPUP_TIMEOUT = 6.0  # max seconds to wait for popup
 
 _cntl = _c("CARD_NAME_BOX_TL", (-940, 113))
@@ -200,9 +197,6 @@ CARD_NAME_BOX = (*_cntl, *_cnbr)
 
 # UUID map file
 UUID_MAP_FILE = os.path.join(os.path.dirname(__file__), "uuid_map.json")
-
-pyautogui.PAUSE = 0.1
-pyautogui.FAILSAFE = True
 
 
 # ─── ADB helpers ──────────────────────────────────────────────────────────
@@ -246,51 +240,17 @@ def adb_clear_field():
 # ─── Click helpers ────────────────────────────────────────────────────────
 
 def click(pos: tuple[int, int], delay: float = 1.0):
-    print(f"    > click ({pos[0]}, {pos[1]})")
-    pyautogui.click(pos[0], pos[1])
-    time.sleep(delay)
+    adb_screen.tap(pos[0], pos[1], delay)
 
 
 def click_and_wait(pos: tuple[int, int], delay: float = 2.5):
-    print(f"    > click+wait ({pos[0]}, {pos[1]}) [{delay}s]")
-    pyautogui.click(pos[0], pos[1])
-    time.sleep(delay)
+    adb_screen.tap_and_wait(pos[0], pos[1], delay)
 
 
 # ─── Color helpers ────────────────────────────────────────────────────────
 
 def get_pixel_color(x: int, y: int) -> str:
-    hdc = ctypes.windll.user32.GetDC(0)
-    pixel = ctypes.windll.gdi32.GetPixel(hdc, x, y)
-    ctypes.windll.user32.ReleaseDC(0, hdc)
-    if pixel == -1:
-        return "000000"
-    r = pixel & 0xFF
-    g = (pixel >> 8) & 0xFF
-    b = (pixel >> 16) & 0xFF
-    return f"{r:02x}{g:02x}{b:02x}"
-
-
-def _get_pixel_rgb(hdc, x: int, y: int) -> tuple[int, int, int] | None:
-    """Get RGB tuple from a screen pixel using an existing DC handle."""
-    pixel = ctypes.windll.gdi32.GetPixel(hdc, x, y)
-    if pixel == -1:
-        return None
-    r = pixel & 0xFF
-    g = (pixel >> 8) & 0xFF
-    b = (pixel >> 16) & 0xFF
-    return (r, g, b)
-
-
-def _color_matches(rgb: tuple[int, int, int] | None,
-                   target: tuple[int, int, int],
-                   tolerance: int) -> bool:
-    """Check if an RGB color matches a target within per-channel tolerance."""
-    if rgb is None:
-        return False
-    return (abs(rgb[0] - target[0]) <= tolerance and
-            abs(rgb[1] - target[1]) <= tolerance and
-            abs(rgb[2] - target[2]) <= tolerance)
+    return adb_screen.get_pixel_hex(x, y)
 
 
 def has_active_order() -> bool:
@@ -301,9 +261,9 @@ def has_active_order() -> bool:
 # ─── OCR ──────────────────────────────────────────────────────────────────
 
 def ocr_region(box: tuple[int, int, int, int]) -> str:
-    """Screenshot a region and OCR it. Uses all_screens for multi-monitor."""
+    """Grab a region from ADB screenshot and OCR it."""
     try:
-        img = ImageGrab.grab(bbox=box, all_screens=True)
+        img = adb_screen.grab_region(box)
         text = pytesseract.image_to_string(img, config="--psm 7")
         return text.strip()
     except Exception as e:
@@ -313,48 +273,58 @@ def ocr_region(box: tuple[int, int, int, int]) -> str:
 
 def _is_stubs_logo_color(r: int, g: int, b: int) -> bool:
     """Check if a pixel is the orange/gold stubs S logo color (tolerant range)."""
-    # Logo is orange-gold: R high (160-220), G medium (130-180), B low (0-40)
     return 160 <= r <= 220 and 130 <= g <= 180 and b <= 40
 
-STUBS_LOGO_Y = 197  # horizontal line to scan for logo
 
-
-def _find_stubs_logo_right_edge() -> int | None:
-    """Scan right along STUBS_LOGO_Y to find the rightmost pixel of the S logo."""
-    hdc = ctypes.windll.user32.GetDC(0)
-    start_x = STUBS_BOX[0] - 50
-    end_x = STUBS_BOX[2]
+def _find_stubs_logo_right_edge_in_image(img: Image.Image, box: tuple) -> int | None:
+    """Scan for stubs logo right edge within a region of a screenshot."""
+    logo_y_abs = (box[1] + box[3]) // 2  # vertical center of box
+    logo_y_rel = logo_y_abs - box[1]  # relative to crop
+    
+    # Scan from left to right in the cropped image
     rightmost = None
-    for x in range(start_x, end_x):
-        pixel = ctypes.windll.gdi32.GetPixel(hdc, x, STUBS_LOGO_Y)
-        if pixel == -1:
-            continue
-        r = pixel & 0xFF
-        g = (pixel >> 8) & 0xFF
-        b = (pixel >> 16) & 0xFF
+    scan_start = max(0, box[0] - 50 - box[0])  # start a bit left if possible
+    for x in range(0, img.width):
+        if logo_y_rel < 0 or logo_y_rel >= img.height:
+            break
+        r, g, b = img.getpixel((x, logo_y_rel))
         if _is_stubs_logo_color(r, g, b):
             rightmost = x
-    ctypes.windll.user32.ReleaseDC(0, hdc)
     return rightmost
 
 
 def read_stubs() -> int | None:
-    """OCR the stubs balance, dynamically cropping out the S logo."""
+    """OCR the stubs balance from ADB screenshot, cropping out the S logo."""
     try:
-        # Find right edge of S logo to set left boundary
-        logo_right = _find_stubs_logo_right_edge()
-        if logo_right is not None:
-            left_x = logo_right + 3  # small gap after logo
-            print(f"    [stubs] Logo right edge at x={logo_right}, OCR from x={left_x}")
+        # Take a fresh screenshot and grab the stubs region + some padding for logo
+        adb_screen.invalidate_cache()
+        full_img = adb_screen.screenshot()
+        
+        padded_box = (STUBS_BOX[0] - 50, STUBS_BOX[1], STUBS_BOX[2], STUBS_BOX[3])
+        padded_box = (max(0, padded_box[0]), padded_box[1], padded_box[2], padded_box[3])
+        region = full_img.crop(padded_box)
+        
+        # Find logo right edge
+        logo_y_rel = (STUBS_BOX[1] + STUBS_BOX[3]) // 2 - padded_box[1]
+        rightmost = None
+        for x in range(region.width):
+            if 0 <= logo_y_rel < region.height:
+                r, g, b = region.getpixel((x, logo_y_rel))
+                if _is_stubs_logo_color(r, g, b):
+                    rightmost = x
+        
+        if rightmost is not None:
+            left_x = rightmost + 3
+            print(f"    [stubs] Logo right edge at x={rightmost}, OCR from x={left_x}")
         else:
-            left_x = STUBS_BOX[0]  # fallback to configured left
-            print(f"    [stubs] Logo not found, fallback to x={left_x}")
-
-        box = (left_x, STUBS_BOX[1], STUBS_BOX[2], STUBS_BOX[3])
-        print(f"    [stubs] OCR box: {box}")
-        img = ImageGrab.grab(bbox=box, all_screens=True)
+            left_x = STUBS_BOX[0] - padded_box[0]
+            print(f"    [stubs] Logo not found, fallback")
+        
+        # Crop to just the number
+        ocr_region_img = region.crop((left_x, 0, region.width, region.height))
+        
         text = pytesseract.image_to_string(
-            img, config="--psm 7 -c tessedit_char_whitelist=0123456789,"
+            ocr_region_img, config="--psm 7 -c tessedit_char_whitelist=0123456789,"
         )
         cleaned = text.strip().replace(",", "").replace(" ", "")
         print(f"    [stubs] Raw OCR: '{text.strip()}' → cleaned: '{cleaned}'")
@@ -373,33 +343,25 @@ def strip_accents(text: str) -> str:
 
 def ocr_card_price() -> int | None:
     """
-    OCR the top buy price from the card detail page.
-    Dynamically crops out the stubs S logo (same approach as read_stubs).
-    Returns the price as int, or None if OCR fails.
+    OCR the top buy price from the card detail page via ADB screenshot.
+    Dynamically crops out the stubs S logo.
     """
     try:
-        # Scan for stubs logo right edge in the price box
-        logo_y = (CARD_PRICE_BOX[1] + CARD_PRICE_BOX[3]) // 2  # vertical center
-        hdc = ctypes.windll.user32.GetDC(0)
+        adb_screen.invalidate_cache()
+        full_img = adb_screen.screenshot()
+        
+        # Scan for stubs logo in the price box
+        logo_y = (CARD_PRICE_BOX[1] + CARD_PRICE_BOX[3]) // 2
         rightmost_logo = None
         for x in range(CARD_PRICE_BOX[0], CARD_PRICE_BOX[2]):
-            pixel = ctypes.windll.gdi32.GetPixel(hdc, x, logo_y)
-            if pixel == -1:
-                continue
-            r = pixel & 0xFF
-            g = (pixel >> 8) & 0xFF
-            b = (pixel >> 16) & 0xFF
-            if _is_stubs_logo_color(r, g, b):
-                rightmost_logo = x
-        ctypes.windll.user32.ReleaseDC(0, hdc)
+            if 0 <= x < full_img.width and 0 <= logo_y < full_img.height:
+                r, g, b = full_img.getpixel((x, logo_y))
+                if _is_stubs_logo_color(r, g, b):
+                    rightmost_logo = x
 
-        if rightmost_logo is not None:
-            left_x = rightmost_logo + 5
-        else:
-            left_x = CARD_PRICE_BOX[0]
-
+        left_x = rightmost_logo + 5 if rightmost_logo else CARD_PRICE_BOX[0]
         box = (left_x, CARD_PRICE_BOX[1], CARD_PRICE_BOX[2], CARD_PRICE_BOX[3])
-        img = ImageGrab.grab(bbox=box, all_screens=True)
+        img = full_img.crop(box)
         w, h = img.size
         img = img.resize((w * 2, h * 2), Image.NEAREST)
         text = pytesseract.image_to_string(
@@ -743,7 +705,7 @@ def run_buy_orders(cards: list[dict], skip_clear: bool = False,
     print(f"  Strategy: sell_now + 1 (fresh API price per card)")
     print(f"  Stops when: stubs < {stubs_floor} or profit < {min_profit}")
     print()
-    print("  FAILSAFE: Move mouse to top-left corner to abort!")
+    print("  Press Ctrl+C to abort!")
     print("  Starting in 3 seconds...")
     time.sleep(3)
 
@@ -936,41 +898,42 @@ def set_marketplace_rarity(rarity: str):
 
 def has_card_in_quad(quad_num: int) -> bool:
     """
-    Quick check if a card exists in a quadrant by sampling a few pixels
-    at the click position. If all match the dark background, the slot is empty.
+    Quick check if a card exists in a quadrant by sampling pixels
+    from ADB screenshot. If all match the dark background, the slot is empty.
     """
     pos = QUAD_CLICKS[quad_num]
-    hdc = ctypes.windll.user32.GetDC(0)
+    adb_screen.invalidate_cache()
+    img = adb_screen.screenshot()
 
-    # Sample the click position and a few pixels around it
     offsets = [(0, 0), (0, -20), (0, 20)]
     non_bg = 0
     for dx, dy in offsets:
-        rgb = _get_pixel_rgb(hdc, pos[0] + dx, pos[1] + dy)
-        if rgb and not _color_matches(rgb, BACKGROUND_COLOR_RGB, BACKGROUND_TOLERANCE):
+        x = max(0, min(pos[0] + dx, img.width - 1))
+        y = max(0, min(pos[1] + dy, img.height - 1))
+        rgb = img.getpixel((x, y))
+        if not adb_screen.color_matches(rgb, BACKGROUND_COLOR_RGB, BACKGROUND_TOLERANCE):
             non_bg += 1
 
-    ctypes.windll.user32.ReleaseDC(0, hdc)
     return non_bg >= 2  # at least 2 of 3 samples show non-background
 
 
 def scroll_inventory_down():
     """Swipe UP on screen to scroll inventory DOWN (show more cards below)."""
     print("    Scrolling inventory down...")
-    pyautogui.moveTo(SCROLL_DOWN_START[0], SCROLL_DOWN_START[1], duration=0.15)
-    pyautogui.mouseDown()
-    pyautogui.moveTo(SCROLL_DOWN_END[0], SCROLL_DOWN_END[1], duration=0.3)
-    pyautogui.mouseUp()
-    time.sleep(0.5)
+    adb_screen.swipe(
+        SCROLL_DOWN_START[0], SCROLL_DOWN_START[1],
+        SCROLL_DOWN_END[0], SCROLL_DOWN_END[1],
+        duration_ms=300, delay=0.5
+    )
 
 
 def scroll_inventory_up():
     """Swipe DOWN on screen to scroll inventory UP (reverse of scroll_down)."""
-    pyautogui.moveTo(SCROLL_DOWN_END[0], SCROLL_DOWN_END[1], duration=0.15)
-    pyautogui.mouseDown()
-    pyautogui.moveTo(SCROLL_DOWN_START[0], SCROLL_DOWN_START[1], duration=0.3)
-    pyautogui.mouseUp()
-    time.sleep(0.3)
+    adb_screen.swipe(
+        SCROLL_DOWN_END[0], SCROLL_DOWN_END[1],
+        SCROLL_DOWN_START[0], SCROLL_DOWN_START[1],
+        duration_ms=300, delay=0.3
+    )
 
 
 # ─── Sellability checks (on card detail page) ─────────────────────────────
@@ -1009,25 +972,23 @@ def _wait_for_order_popup() -> str:
     print(f"    Waiting for order popup (up to {ORDER_POPUP_TIMEOUT}s)...")
 
     while (time.time() - start) < ORDER_POPUP_TIMEOUT:
-        hdc = ctypes.windll.user32.GetDC(0)
+        adb_screen.invalidate_cache()
+        img = adb_screen.screenshot()
 
         for x in range(ORDER_POPUP_SCAN_X_START, ORDER_POPUP_SCAN_X_END, ORDER_POPUP_SCAN_STEP):
-            rgb = _get_pixel_rgb(hdc, x, ORDER_POPUP_Y)
+            rgb = adb_screen.get_pixel_from_image(img, x, ORDER_POPUP_Y)
             if rgb is None:
                 continue
 
-            if _color_matches(rgb, ORDER_POPUP_GREEN, ORDER_POPUP_TOLERANCE):
-                ctypes.windll.user32.ReleaseDC(0, hdc)
+            if adb_screen.color_matches(rgb, ORDER_POPUP_GREEN, ORDER_POPUP_TOLERANCE):
                 print(f"    Popup: GREEN (success) at x={x}")
                 return "green"
 
-            if _color_matches(rgb, ORDER_POPUP_RED, ORDER_POPUP_TOLERANCE):
-                ctypes.windll.user32.ReleaseDC(0, hdc)
+            if adb_screen.color_matches(rgb, ORDER_POPUP_RED, ORDER_POPUP_TOLERANCE):
                 print(f"    Popup: RED (failed) at x={x}")
                 return "red"
 
-        ctypes.windll.user32.ReleaseDC(0, hdc)
-        time.sleep(0.15)  # poll ~6-7 times/sec
+        time.sleep(0.15)
 
     print("    Popup: TIMEOUT — no color detected")
     return "timeout"
@@ -1064,12 +1025,11 @@ def swipe_refresh(scrolls_to_reverse: int = 0):
         for _ in range(scrolls_to_reverse):
             scroll_inventory_up()
     print("    Refreshing inventory (pull to top)...")
-    pyautogui.moveTo(SWIPE_START[0], SWIPE_START[1], duration=0.2)
-    time.sleep(0.1)
-    pyautogui.mouseDown()
-    pyautogui.moveTo(SWIPE_END[0], SWIPE_END[1], duration=0.4)
-    pyautogui.mouseUp()
-    time.sleep(3.0)
+    adb_screen.swipe(
+        SWIPE_START[0], SWIPE_START[1],
+        SWIPE_END[0], SWIPE_END[1],
+        duration_ms=400, delay=3.0
+    )
 
 
 def click_quad(quad_num: int):
@@ -1087,37 +1047,34 @@ def read_card_name() -> str:
 
 def read_card_name_and_price() -> tuple[str, int | None]:
     """
-    OCR both card name and price in parallel.
-    Grabs both screenshots first, then runs Tesseract on both simultaneously.
+    OCR both card name and price in parallel from a single ADB screenshot.
+    Crops both regions, then runs Tesseract simultaneously.
     Returns (name, price) — either may be empty/None.
     """
     from concurrent.futures import ThreadPoolExecutor
 
-    # 1. Grab both screenshots (fast — just screen capture)
-    name_img = ImageGrab.grab(bbox=CARD_NAME_BOX, all_screens=True)
+    # 1. Single ADB screenshot
+    adb_screen.invalidate_cache()
+    full_img = adb_screen.screenshot()
 
-    # Price: find stubs logo and crop
+    # 2. Crop name region
+    name_img = full_img.crop(CARD_NAME_BOX)
+
+    # 3. Crop price region with stubs logo removal
     logo_y = (CARD_PRICE_BOX[1] + CARD_PRICE_BOX[3]) // 2
-    hdc = ctypes.windll.user32.GetDC(0)
     rightmost_logo = None
     for x in range(CARD_PRICE_BOX[0], CARD_PRICE_BOX[2]):
-        pixel = ctypes.windll.gdi32.GetPixel(hdc, x, logo_y)
-        if pixel == -1:
-            continue
-        r = pixel & 0xFF
-        g = (pixel >> 8) & 0xFF
-        b = (pixel >> 16) & 0xFF
-        if _is_stubs_logo_color(r, g, b):
-            rightmost_logo = x
-    ctypes.windll.user32.ReleaseDC(0, hdc)
+        if 0 <= x < full_img.width and 0 <= logo_y < full_img.height:
+            r, g, b = full_img.getpixel((x, logo_y))
+            if _is_stubs_logo_color(r, g, b):
+                rightmost_logo = x
 
     price_left = rightmost_logo + 5 if rightmost_logo else CARD_PRICE_BOX[0]
-    price_box = (price_left, CARD_PRICE_BOX[1], CARD_PRICE_BOX[2], CARD_PRICE_BOX[3])
-    price_img = ImageGrab.grab(bbox=price_box, all_screens=True)
+    price_img = full_img.crop((price_left, CARD_PRICE_BOX[1], CARD_PRICE_BOX[2], CARD_PRICE_BOX[3]))
     w, h = price_img.size
     price_img = price_img.resize((w * 2, h * 2), Image.NEAREST)
 
-    # 2. OCR both in parallel
+    # 4. OCR both in parallel
     def _ocr_name(img):
         return pytesseract.image_to_string(img, config="--psm 7").strip()
 
@@ -1369,7 +1326,7 @@ def sell_one_card(quad_num: int, uuid_map: dict, rarity: str = "silver",
 
     # Step 9: Finalize
     print("    [9] Clicking finalize...")
-    pyautogui.click(BTN_FINALIZE[0], BTN_FINALIZE[1])
+    adb_screen.tap(BTN_FINALIZE[0], BTN_FINALIZE[1], delay=0.1)
 
     # Step 10: Check popup
     popup = _wait_for_order_popup()
@@ -1434,7 +1391,7 @@ def run_sell_orders(skip_clear: bool = False, rarity: str = "silver",
     print(f"  Sellability: attempt sell → check green/red popup")
     print(f"  Max scrolls per pass: {max_scrolls}")
     print()
-    print("  FAILSAFE: Move mouse to top-left corner to abort!")
+    print("  Press Ctrl+C to abort!")
     print("  Starting in 3 seconds...")
     time.sleep(3)
 
@@ -1565,7 +1522,7 @@ def run_sell_orders(skip_clear: bool = False, rarity: str = "silver",
 # ─── Deep Pockets inventory filter (OVR 80+) ─────────────────────────────
 BTN_DP_FILTER_OVR_SECTION = _c("BTN_DP_FILTER_OVR_SECTION", (-369, 672))
 BTN_DP_FILTER_OVR_NUMBER = _c("BTN_DP_FILTER_OVR_NUMBER", (-311, 758))
-BTN_DP_FILTER_OVR_80 = _c("BTN_DP_FILTER_OVR_80", (-320, 177))
+BTN_DP_FILTER_OVR_80 = _c("BTN_DP_FILTER_OVR_80", (633, 110))
 BTN_DP_FILTER_OVR_CONFIRM = _c("BTN_DP_FILTER_OVR_CONFIRM", (-322, 124))
 # Reuses BTN_FILTER_OPEN and BTN_FILTER_SHOW from sell flow
 
@@ -1580,12 +1537,12 @@ def _apply_ovr_filter():
     click_and_wait(BTN_DP_FILTER_OVR_NUMBER, 1.5)
     # Drag the number picker down to increase to 80
     # Long slow swipes downward 800px each
-    for i in range(4):
-        pyautogui.moveTo(BTN_DP_FILTER_OVR_NUMBER[0], BTN_DP_FILTER_OVR_NUMBER[1], duration=0.2)
-        pyautogui.mouseDown()
-        pyautogui.moveTo(BTN_DP_FILTER_OVR_NUMBER[0], BTN_DP_FILTER_OVR_NUMBER[1] + 800, duration=0.5)
-        pyautogui.mouseUp()
-        time.sleep(0.5)
+    for i in range(3):
+        adb_screen.swipe(
+            BTN_DP_FILTER_OVR_NUMBER[0], BTN_DP_FILTER_OVR_NUMBER[1],
+            BTN_DP_FILTER_OVR_NUMBER[0], BTN_DP_FILTER_OVR_NUMBER[1] + 800,
+            duration_ms=500, delay=0.5
+        )
     # Click 80
     click_and_wait(BTN_DP_FILTER_OVR_80, 1.0)
     click_and_wait(BTN_DP_FILTER_OVR_CONFIRM, 1.5)
@@ -1642,7 +1599,7 @@ def run_deep_pockets_sell(skip_clear: bool = False, max_scrolls: int = None):
     print(f"  Cards with no gold/diamond UUID are skipped")
     print(f"  Max scrolls per pass: {max_scrolls}")
     print()
-    print("  FAILSAFE: Move mouse to top-left corner to abort!")
+    print("  Press Ctrl+C to abort!")
     print("  Starting in 3 seconds...")
     time.sleep(3)
 
@@ -1825,7 +1782,7 @@ def run_deep_pockets_sell(skip_clear: bool = False, max_scrolls: int = None):
                 time.sleep(0.2)
                 adb_text(str(price))
                 time.sleep(0.5)
-                pyautogui.click(BTN_FINALIZE[0], BTN_FINALIZE[1])
+                adb_screen.tap(BTN_FINALIZE[0], BTN_FINALIZE[1], delay=0.1)
 
                 # Check popup
                 popup = _wait_for_order_popup()
