@@ -1,17 +1,18 @@
 """
-MLB The Show 26 - Android Emulator Buy Automation
+MLB The Show 26 - Android Emulator Automation
 
 ADB-based automation for MuMu Android emulator.
 All screen interaction via ADB — runs headless without a visible display.
 Uses ADB for taps, swipes, text input, and screenshots.
 OCR via Tesseract on ADB screenshots.
 
+Modes:
+  Gold + Diamond:   OVR 80+ inventory filter, sells/buys gold and diamond cards
+  All Tiers:        OVR 74+ inventory filter, sells/buys silver, gold, and diamond cards
+
 Flow:
-  1. Clear any active buy orders
-  2. Check stubs via OCR
-  3. Navigate to marketplace (prefiltered silvers)
-  4. For each card: search full name, OCR match in results, place buy order
-  5. Stop when stubs < 150
+  Sell: Navigate filtered inventory grid, OCR card names, match UUIDs, place sell orders
+  Buy:  Search marketplace by rarity tier (diamond → gold → silver), place buy orders
 """
 
 import json
@@ -49,7 +50,7 @@ _mkt_filter_state = "silver"
 # ─── Emulator coordinates ──────────────────────────────────────────────────
 # Loaded from emulator_coords.json if it exists, otherwise uses defaults.
 
-EMULATOR_COORDS_FILE = os.path.join(os.path.dirname(__file__), "emulator_coords.json")
+EMULATOR_COORDS_FILE = "emulator_coords.json"
 
 def _load_emulator_coords() -> dict:
     try:
@@ -78,9 +79,6 @@ BTN_SEARCH_CLEAR = _c("BTN_SEARCH_CLEAR", (-93, 355))
 BTN_SEARCH_INPUT = _c("BTN_SEARCH_INPUT", (-899, 361))
 
 # Marketplace rarity filter
-# The dropdown button positions change based on current filter state.
-# "from_silver" = what to click when currently showing silver
-# "from_gold" = what to click when currently showing gold
 BTN_MKT_FILTER_OPEN = _c("BTN_MKT_FILTER_OPEN", (-234, 477))
 BTN_MKT_FILTER_DROPDOWN = _c("BTN_MKT_FILTER_DROPDOWN", (-384, 653))
 BTN_MKT_GOLD_FROM_SILVER = _c("BTN_MKT_GOLD_FROM_SILVER", (-395, 653))
@@ -142,11 +140,7 @@ SWIPE_START = _c("SWIPE_START", (-534, 418))
 SWIPE_END = _c("SWIPE_END", (-534, 940))
 
 # ─── Inventory grid (sell flow — 4 quadrants) ─────────────────────────────
-# The inventory shows a 2x2 grid of cards. We check card presence via
-# background color, then click into each card to check sellability via
-# menu button detection and OCR of the sellable count.
 
-# Click positions for each quadrant (1=TL, 2=TR, 3=BL, 4=BR)
 QUAD_CLICK_TL = _c("QUAD_CLICK_TL", (-783, 601))
 QUAD_CLICK_TR = _c("QUAD_CLICK_TR", (-279, 606))
 QUAD_CLICK_BL = _c("QUAD_CLICK_BL", (-785, 1309))
@@ -166,22 +160,21 @@ SCROLL_DOWN_END = _c("SCROLL_DOWN_END", (-519, 433))
 MAX_SCROLL_ATTEMPTS = _EMU_COORDS.get("MAX_SCROLL_ATTEMPTS", 20)
 
 # Card presence detection (background = no card)
-BACKGROUND_COLOR_RGB = (0x0c, 0x23, 0x40) # 0c2340
-BACKGROUND_TOLERANCE = 10                 # per-channel tolerance
+BACKGROUND_COLOR_RGB = (0x0c, 0x23, 0x40)  # 0c2340
+BACKGROUND_TOLERANCE = 10
 
 # Sellability checks (on card detail page)
 MENU_BTN_CHECK = _c("MENU_BTN_CHECK", (-78, 1761))
 MENU_BTN_COLOR = "d7dadd"
 MENU_BTN_TOLERANCE = 5
 
-# Card page price OCR box (top buy price — used to verify correct card for duplicates)
+# Card page price OCR box
 _cptl = _c("CARD_PRICE_BOX_TL", (-961, 870))
 _cpbr = _c("CARD_PRICE_BOX_BR", (-559, 914))
 CARD_PRICE_BOX = (*_cptl, *_cpbr)
-PRICE_MATCH_TOLERANCE = 0.15  # 15% — enough for sync drift, distinct enough for dupes
+PRICE_MATCH_TOLERANCE = 0.15
 
-# Order result popup — scans for green/red at y=149 (ADB coords)
-# Green (4caf50) = success, Red (f44336) = failed
+# Order result popup
 ORDER_POPUP_Y = 149
 ORDER_POPUP_GREEN = (0x4c, 0xaf, 0x50)
 ORDER_POPUP_RED = (0xf4, 0x43, 0x36)
@@ -189,35 +182,54 @@ ORDER_POPUP_TOLERANCE = 10
 ORDER_POPUP_SCAN_X_START = 150
 ORDER_POPUP_SCAN_X_END = 816
 ORDER_POPUP_SCAN_STEP = 17
-ORDER_POPUP_TIMEOUT = 6.0  # max seconds to wait for popup
+ORDER_POPUP_TIMEOUT = 6.0
 
 _cntl = _c("CARD_NAME_BOX_TL", (-940, 113))
 _cnbr = _c("CARD_NAME_BOX_BR", (-660, 144))
 CARD_NAME_BOX = (*_cntl, *_cnbr)
 
 # UUID map file
-UUID_MAP_FILE = os.path.join(os.path.dirname(__file__), "uuid_map.json")
+UUID_MAP_FILE = "uuid_map.json"
+
+# ─── OVR filter coordinates ──────────────────────────────────────────────
+BTN_FILTER_OVR_SECTION = _c("BTN_DP_FILTER_OVR_SECTION", (-369, 672))
+BTN_FILTER_OVR_NUMBER = _c("BTN_DP_FILTER_OVR_NUMBER", (-311, 758))
+BTN_FILTER_OVR_80 = _c("BTN_DP_FILTER_OVR_80", (633, 110))
+BTN_FILTER_OVR_74 = _c("BTN_FILTER_OVR_74", (632, 541))
+BTN_FILTER_OVR_CONFIRM = _c("BTN_DP_FILTER_OVR_CONFIRM", (-322, 124))
+
+# Max OVR filter (for silver-only mode — cap at 79 to exclude gold/diamond)
+BTN_FILTER_OVR_MAX_NUMBER = _c("BTN_FILTER_OVR_MAX_NUMBER", (811, 626))
+BTN_FILTER_OVR_MAX_VALUE = _c("BTN_FILTER_OVR_MAX_VALUE", (801, 1170))
+
+# Swipe counts to reach each OVR target in the number picker
+OVR_SWIPES = {80: 3, 74: 3}
 
 
 # ─── ADB helpers ──────────────────────────────────────────────────────────
+
+import sys as _sys
+_NO_WINDOW = subprocess.CREATE_NO_WINDOW if _sys.platform == "win32" else 0
+
 
 def adb(cmd: str):
     """Run an ADB shell command on the emulator."""
     subprocess.run(
         ["adb", "-s", ADB_DEVICE, "shell"] + cmd.split(),
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        creationflags=_NO_WINDOW,
     )
 
 
 def adb_text(text: str):
     """Type text into the emulator via ADB. Strips accents for compatibility."""
-    # Strip accents: é→e, í→i, ñ→n, ü→u, etc.
     normalized = unicodedata.normalize("NFD", text)
     ascii_text = "".join(c for c in normalized if unicodedata.category(c) != "Mn")
     escaped = ascii_text.replace(" ", "%s").replace("'", "\\'")
     subprocess.run(
         ["adb", "-s", ADB_DEVICE, "shell", "input", "text", escaped],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        creationflags=_NO_WINDOW,
     )
 
 
@@ -232,6 +244,7 @@ def adb_clear_field():
     subprocess.run(
         ["adb", "-s", ADB_DEVICE, "shell", "input", "keyevent", "--longpress", "29", "53"],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        creationflags=_NO_WINDOW,
     )
     time.sleep(0.1)
     adb("input keyevent 67")  # DEL
@@ -276,35 +289,16 @@ def _is_stubs_logo_color(r: int, g: int, b: int) -> bool:
     return 160 <= r <= 220 and 130 <= g <= 180 and b <= 40
 
 
-def _find_stubs_logo_right_edge_in_image(img: Image.Image, box: tuple) -> int | None:
-    """Scan for stubs logo right edge within a region of a screenshot."""
-    logo_y_abs = (box[1] + box[3]) // 2  # vertical center of box
-    logo_y_rel = logo_y_abs - box[1]  # relative to crop
-    
-    # Scan from left to right in the cropped image
-    rightmost = None
-    scan_start = max(0, box[0] - 50 - box[0])  # start a bit left if possible
-    for x in range(0, img.width):
-        if logo_y_rel < 0 or logo_y_rel >= img.height:
-            break
-        r, g, b = img.getpixel((x, logo_y_rel))
-        if _is_stubs_logo_color(r, g, b):
-            rightmost = x
-    return rightmost
-
-
 def read_stubs() -> int | None:
     """OCR the stubs balance from ADB screenshot, cropping out the S logo."""
     try:
-        # Take a fresh screenshot and grab the stubs region + some padding for logo
         adb_screen.invalidate_cache()
         full_img = adb_screen.screenshot()
-        
+
         padded_box = (STUBS_BOX[0] - 50, STUBS_BOX[1], STUBS_BOX[2], STUBS_BOX[3])
         padded_box = (max(0, padded_box[0]), padded_box[1], padded_box[2], padded_box[3])
         region = full_img.crop(padded_box)
-        
-        # Find logo right edge
+
         logo_y_rel = (STUBS_BOX[1] + STUBS_BOX[3]) // 2 - padded_box[1]
         rightmost = None
         for x in range(region.width):
@@ -312,17 +306,16 @@ def read_stubs() -> int | None:
                 r, g, b = region.getpixel((x, logo_y_rel))
                 if _is_stubs_logo_color(r, g, b):
                     rightmost = x
-        
+
         if rightmost is not None:
             left_x = rightmost + 3
             print(f"    [stubs] Logo right edge at x={rightmost}, OCR from x={left_x}")
         else:
             left_x = STUBS_BOX[0] - padded_box[0]
             print(f"    [stubs] Logo not found, fallback")
-        
-        # Crop to just the number
+
         ocr_region_img = region.crop((left_x, 0, region.width, region.height))
-        
+
         text = pytesseract.image_to_string(
             ocr_region_img, config="--psm 7 -c tessedit_char_whitelist=0123456789,"
         )
@@ -342,15 +335,11 @@ def strip_accents(text: str) -> str:
 
 
 def ocr_card_price() -> int | None:
-    """
-    OCR the top buy price from the card detail page via ADB screenshot.
-    Dynamically crops out the stubs S logo.
-    """
+    """OCR the top buy price from the card detail page via ADB screenshot."""
     try:
         adb_screen.invalidate_cache()
         full_img = adb_screen.screenshot()
-        
-        # Scan for stubs logo in the price box
+
         logo_y = (CARD_PRICE_BOX[1] + CARD_PRICE_BOX[3]) // 2
         rightmost_logo = None
         for x in range(CARD_PRICE_BOX[0], CARD_PRICE_BOX[2]):
@@ -389,12 +378,10 @@ def get_search_term(full_name: str) -> str:
     Pick the best single name to search by.
     Skips suffixes (Jr., Sr., II, III, IV, V).
     Prefer a part that has no accents since the app won't match stripped accents.
-    If both parts have accents, use first name (usually simpler).
     """
     SUFFIXES = {"jr.", "jr", "sr.", "sr", "ii", "iii", "iv", "v"}
 
     parts = full_name.strip().split()
-    # Strip suffixes from the end
     while len(parts) > 1 and parts[-1].lower().rstrip(".") in {s.rstrip(".") for s in SUFFIXES}:
         parts = parts[:-1]
 
@@ -407,21 +394,17 @@ def get_search_term(full_name: str) -> str:
     first_clean = strip_accents(first)
     last_clean = strip_accents(last)
 
-    # Prefer the part that doesn't change when stripped (no accents)
     if last == last_clean:
         return last
     elif first == first_clean:
         return first
     else:
-        # Both have accents — use first name, it's usually shorter/simpler
         return first
 
 
 def find_card_in_results(target_name: str) -> list[tuple[int, int]]:
     """
     OCR each of the 4 result boxes. Returns ALL positions matching the target name.
-    Tries full name first, then last name + first initial fallback.
-    Returns list of (x, y) click positions, possibly empty.
     """
     target_clean = strip_accents(target_name).lower()
     parts = target_name.strip().split()
@@ -440,11 +423,9 @@ def find_card_in_results(target_name: str) -> list[tuple[int, int]]:
         ocr_parts = ocr_clean.strip().split()
         matched = False
 
-        # Full name match
         if target_clean in ocr_clean:
             matched = True
 
-        # Last name + first initial fallback
         if not matched and last_name and last_name in ocr_clean:
             if first_initial and ocr_parts and ocr_parts[0][0:1] == first_initial:
                 matched = True
@@ -502,23 +483,6 @@ def clear_sell_orders():
     return n
 
 
-def clear_active_orders():
-    """Clear both buy and sell orders."""
-    print("  Clearing all active orders...")
-    _navigate_to_orders()
-
-    buy_n = _cancel_visible_orders("buy")
-    print(f"  Cancelled {buy_n} buy order(s)." if buy_n else "  No active buy orders.")
-
-    print("    Switching to sell orders tab...")
-    click_and_wait(BTN_SELL_ORDERS_TAB, 3.0)
-
-    sell_n = _cancel_visible_orders("sell")
-    print(f"  Cancelled {sell_n} sell order(s)." if sell_n else "  No active sell orders.")
-
-    return buy_n + sell_n
-
-
 # ─── Buy one card ──────────────────────────────────────────────────────────
 
 def buy_one_card(name: str, uuid: str, rarity: str = "silver",
@@ -526,10 +490,6 @@ def buy_one_card(name: str, uuid: str, rarity: str = "silver",
     """
     Search for a card by full name, OCR to find correct result,
     open it, place buy order at latest sell_now + 1.
-
-    If is_duplicate_name is True (multiple cards with same name+rarity),
-    OCR's the buy price from the card page and compares with API to verify
-    we clicked the correct card. Tries each match until one verifies.
 
     For gold cards: re-checks profit using fresh API prices (must exceed min_profit).
     For diamond cards: re-checks that profit is >3% after tax.
@@ -563,7 +523,7 @@ def buy_one_card(name: str, uuid: str, rarity: str = "silver",
 
     print(f"    [3] Found {len(match_positions)} match(es)")
 
-    # Step 4: Fetch latest price from API (before clicking — need it for verification)
+    # Step 4: Fetch latest price from API
     print("    [4] Fetching latest price from API...")
     try:
         listing = fetch_single_listing(uuid)
@@ -611,7 +571,6 @@ def buy_one_card(name: str, uuid: str, rarity: str = "silver",
         click_and_wait(pos, 2.5)
 
         if is_duplicate_name and api_buy_now is not None:
-            # OCR the price shown on the card page to verify it's the right card
             screen_price = ocr_card_price()
             if screen_price is not None:
                 if prices_match(screen_price, api_buy_now):
@@ -627,7 +586,6 @@ def buy_one_card(name: str, uuid: str, rarity: str = "silver",
                 verified_match = pos
                 break
         else:
-            # No duplicate or no API price — just use first match
             verified_match = pos
             break
 
@@ -677,17 +635,12 @@ def run_buy_orders(cards: list[dict], skip_clear: bool = False,
     """
     Full buy loop: clear buy orders, check stubs, buy until stubs < threshold
     or profit drops below min_profit.
-    
-    skip_names: set of card names to skip (e.g. cards already sold this cycle)
-    rarity: "silver" or "gold" — sets marketplace filter before searching
-    skip_navigate: if True, don't navigate to marketplace (already there, just switch filter)
     """
     global _mkt_filter_state
 
     if skip_names is None:
         skip_names = set()
 
-    # Safety net: also skip blacklisted cards even if caller forgot to filter
     blacklist = load_blacklist()
     if blacklist:
         skip_names = skip_names | blacklist
@@ -730,7 +683,7 @@ def run_buy_orders(cards: list[dict], skip_clear: bool = False,
     else:
         print("  WARNING: Could not read stubs. Continuing anyway.")
 
-    # 4. Load uuid_map to detect duplicate names (e.g. two diamond Ketel Marte cards)
+    # 4. Load uuid_map to detect duplicate names
     uuid_map = load_uuid_map()
     duplicate_names = set()
     for map_name, map_val in uuid_map.items():
@@ -769,7 +722,6 @@ def run_buy_orders(cards: list[dict], skip_clear: bool = False,
             skipped += 1
             continue
 
-        # For gold: skip card if buying it would drop us below threshold
         if stubs is not None and (stubs - est_price) < stubs_floor:
             print(f"\n  [{i+1}/{len(cards)}] {name} — {est_price}s would drop below {stubs_floor}. Skipping.")
             skipped += 1
@@ -837,30 +789,14 @@ def load_uuid_map() -> dict:
 # ─── Marketplace filter ────────────────────────────────────────────────────
 
 def assume_marketplace_state(rarity: str):
-    """
-    Declare the current marketplace filter state without clicking anything.
-    Used when the user has manually set the filter, or when we know the
-    lowest enabled tier is already active.
-    """
+    """Declare the current marketplace filter state without clicking anything."""
     global _mkt_filter_state
     _mkt_filter_state = rarity
     print(f"  Assuming marketplace is filtered to {rarity}.")
 
 
 def set_marketplace_rarity(rarity: str):
-    """Set the marketplace search filter to a specific rarity.
-    Tracks current state since button positions change based on what's selected.
-    
-    Available direct transitions:
-      silver → gold (BTN_MKT_GOLD_FROM_SILVER)
-      gold → silver (BTN_MKT_SILVER_FROM_GOLD)
-      gold → diamond (BTN_MKT_DIAMOND_FROM_GOLD)
-      diamond → silver (BTN_MKT_SILVER_FROM_DIAMOND)
-      diamond → gold (BTN_MKT_GOLD_FROM_DIAMOND)
-    
-    Multi-step:
-      silver → diamond: go through gold first
-    """
+    """Set the marketplace search filter to a specific rarity."""
     global _mkt_filter_state
 
     if rarity == _mkt_filter_state:
@@ -897,14 +833,16 @@ def set_marketplace_rarity(rarity: str):
 # ─── Grid card presence check ──────────────────────────────────────────────
 
 def has_card_in_quad(quad_num: int) -> bool:
-    """
-    Quick check if a card exists in a quadrant by sampling pixels
-    from ADB screenshot. If all match the dark background, the slot is empty.
-    """
+    """Quick check if a card exists in a quadrant by sampling pixels."""
     pos = QUAD_CLICKS[quad_num]
     adb_screen.invalidate_cache()
     img = adb_screen.screenshot()
+    return _has_card_in_quad_from_image(quad_num, img)
 
+
+def _has_card_in_quad_from_image(quad_num: int, img: Image.Image) -> bool:
+    """Check if a card exists in a quadrant from a pre-captured screenshot."""
+    pos = QUAD_CLICKS[quad_num]
     offsets = [(0, 0), (0, -20), (0, 20)]
     non_bg = 0
     for dx, dy in offsets:
@@ -913,12 +851,176 @@ def has_card_in_quad(quad_num: int) -> bool:
         rgb = img.getpixel((x, y))
         if not adb_screen.color_matches(rgb, BACKGROUND_COLOR_RGB, BACKGROUND_TOLERANCE):
             non_bg += 1
+    return non_bg >= 2
 
-    return non_bg >= 2  # at least 2 of 3 samples show non-background
+
+# ─── Card fingerprinting ──────────────────────────────────────────────────
+# Captures vertical strips of pixel colors through each card in the
+# inventory grid at multiple x-offsets. Since each card has unique art,
+# the combined color sequence acts as a visual ID — letting us identify
+# unsellable cards from the grid view without clicking into them.
+#
+# Multiple columns make the fingerprint robust to scroll jitter — even if
+# one column shifts slightly, the others keep the match stable.
+# Fingerprints persist at module level across sell→buy→sell cycles.
+
+FINGERPRINT_SAMPLES = 40           # fixed-length output per fingerprint
+FINGERPRINT_Y_EXTENT = 180         # pixels above/below quad center to sample
+FINGERPRINT_SAMPLE_STEP = 3        # sample every Nth pixel in each strip
+FINGERPRINT_X_OFFSETS = (-80, 0, 80)  # x-offsets from quad center to sample
+FINGERPRINT_QUANTIZE = 4           # round RGB to nearest N (reduces noise)
+FINGERPRINT_PIXEL_TOLERANCE = 36   # per-channel tolerance for matching
+FINGERPRINT_MATCH_RATIO = 0.50     # fraction of samples that must match
+
+# Module-level fingerprint cache — persists across sell calls within a session
+_session_unsellable_fps: list[list[tuple]] = []
+
+
+def _quantize_rgb(r: int, g: int, b: int) -> tuple[int, int, int]:
+    """Round RGB channels to nearest QUANTIZE_STEP."""
+    q = FINGERPRINT_QUANTIZE
+    return (round(r / q) * q, round(g / q) * q, round(b / q) * q)
+
+
+def _capture_fingerprint(quad_num: int, img: Image.Image) -> list[tuple] | None:
+    """
+    Capture a multi-column vertical color fingerprint of a card.
+
+    Samples vertical strips at multiple x-offsets through the card,
+    keeps only non-background pixels, quantizes colors, and combines
+    into a single fixed-length fingerprint.
+
+    Returns None if too few art pixels found (empty slot or edge case).
+    """
+    pos = QUAD_CLICKS[quad_num]
+    cx = pos[0]
+    cy = pos[1]
+
+    y_start = max(0, cy - FINGERPRINT_Y_EXTENT)
+    y_end = min(img.height - 1, cy + FINGERPRINT_Y_EXTENT)
+
+    # Collect non-background pixels from multiple vertical strips
+    art_pixels = []
+    for x_off in FINGERPRINT_X_OFFSETS:
+        x = max(0, min(cx + x_off, img.width - 1))
+        for y in range(y_start, y_end + 1, FINGERPRINT_SAMPLE_STEP):
+            rgb = img.getpixel((x, y))
+            if not adb_screen.color_matches(rgb, BACKGROUND_COLOR_RGB, BACKGROUND_TOLERANCE + 5):
+                art_pixels.append(_quantize_rgb(*rgb))
+
+    if len(art_pixels) < 12:
+        return None
+
+    # Resample to fixed length for consistent comparison
+    if len(art_pixels) <= FINGERPRINT_SAMPLES:
+        return art_pixels
+
+    step = len(art_pixels) / FINGERPRINT_SAMPLES
+    return [art_pixels[int(i * step)] for i in range(FINGERPRINT_SAMPLES)]
+
+
+def _fingerprints_match(fp1: list[tuple], fp2: list[tuple]) -> bool:
+    """
+    Check if two fingerprints match using per-pixel tolerance.
+    Returns True if enough individual samples are close enough.
+    More robust than averaged Euclidean distance — a single outlier
+    pixel won't ruin the match.
+    """
+    min_len = min(len(fp1), len(fp2))
+    if min_len < 6:
+        return False
+
+    step1 = len(fp1) / min_len
+    step2 = len(fp2) / min_len
+
+    matches = 0
+    tol = FINGERPRINT_PIXEL_TOLERANCE
+    for i in range(min_len):
+        r1, g1, b1 = fp1[int(i * step1)]
+        r2, g2, b2 = fp2[int(i * step2)]
+        if abs(r1 - r2) <= tol and abs(g1 - g2) <= tol and abs(b1 - b2) <= tol:
+            matches += 1
+
+    return (matches / min_len) >= FINGERPRINT_MATCH_RATIO
+
+
+def _is_fingerprint_known(fp: list[tuple]) -> bool:
+    """Check if a fingerprint matches any in the session unsellable list."""
+    if not fp:
+        return False
+    for known in _session_unsellable_fps:
+        if _fingerprints_match(fp, known):
+            return True
+    return False
+
+
+def _store_unsellable_fingerprint(fp: list[tuple] | None):
+    """Add a fingerprint to the session-level unsellable cache."""
+    if fp:
+        _session_unsellable_fps.append(fp)
+
+
+def _learn_fingerprint_from_grid(quad_num: int):
+    """
+    Capture a fresh fingerprint from the grid after closing back from a card.
+    
+    The pre-scan fingerprint may not match on future encounters if the card
+    is at a different scroll position or quad. This grabs a second fingerprint
+    at the card's current position, increasing the chance of matching later.
+    """
+    adb_screen.invalidate_cache()
+    fresh_img = adb_screen.screenshot()
+    fp = _capture_fingerprint(quad_num, fresh_img)
+    _store_unsellable_fingerprint(fp)
+
+
+def reset_session_fingerprints():
+    """Clear all cached fingerprints (call if inventory changes externally)."""
+    _session_unsellable_fps.clear()
+    print(f"  Session fingerprint cache cleared.")
+
+
+# ─── Duplicate icon detection ─────────────────────────────────────────────
+# When a player has >1 of a card, a teal badge appears on the card in
+# the grid view. If a fingerprint-matched "unsellable" card now shows
+# the badge, it means we acquired another copy and it's now sellable.
+# We also multi-sell duplicates until the red popup.
+#
+# The icon is always at a fixed x per column. Y shifts with scroll,
+# so we just scan a vertical line through the card's full extent.
+
+DUPE_ICON_COLOR = (0x06, 0xe9, 0xc3)
+DUPE_ICON_TOLERANCE = 15
+
+# X-position per column (left = quads 1,3 / right = quads 2,4)
+DUPE_ICON_X = {
+    1: _c("DUPE_ICON_X_LEFT", (151,))[0],
+    2: _c("DUPE_ICON_X_RIGHT", (585,))[0],
+    3: _c("DUPE_ICON_X_LEFT", (151,))[0],
+    4: _c("DUPE_ICON_X_RIGHT", (585,))[0],
+}
+
+
+def _has_dupe_icon(quad_num: int, img: Image.Image) -> bool:
+    """
+    Check if the duplicate badge (teal icon) is visible on a card.
+    Scans a vertical line at the icon's x through the card's y range.
+    """
+    x = DUPE_ICON_X[quad_num]
+    cy = QUAD_CLICKS[quad_num][1]
+    y_start = max(0, cy - FINGERPRINT_Y_EXTENT)
+    y_end = min(img.height - 1, cy + FINGERPRINT_Y_EXTENT)
+
+    x = max(0, min(x, img.width - 1))
+    for y in range(y_start, y_end + 1, 3):
+        rgb = img.getpixel((x, y))
+        if adb_screen.color_matches(rgb, DUPE_ICON_COLOR, DUPE_ICON_TOLERANCE):
+            return True
+    return False
 
 
 def scroll_inventory_down():
-    """Swipe UP on screen to scroll inventory DOWN (show more cards below)."""
+    """Swipe UP on screen to scroll inventory DOWN."""
     print("    Scrolling inventory down...")
     adb_screen.swipe(
         SCROLL_DOWN_START[0], SCROLL_DOWN_START[1],
@@ -928,7 +1030,7 @@ def scroll_inventory_down():
 
 
 def scroll_inventory_up():
-    """Swipe DOWN on screen to scroll inventory UP (reverse of scroll_down)."""
+    """Swipe DOWN on screen to scroll inventory UP."""
     adb_screen.swipe(
         SCROLL_DOWN_END[0], SCROLL_DOWN_END[1],
         SCROLL_DOWN_START[0], SCROLL_DOWN_START[1],
@@ -939,12 +1041,8 @@ def scroll_inventory_up():
 # ─── Sellability checks (on card detail page) ─────────────────────────────
 
 def _check_menu_button_exists() -> bool:
-    """
-    Check if the menu (three dots) button exists on the card detail page.
-    Cards with no marketplace presence won't have this button.
-    """
+    """Check if the menu (three dots) button exists on the card detail page."""
     color = get_pixel_color(MENU_BTN_CHECK[0], MENU_BTN_CHECK[1])
-    # Parse hex color and compare with tolerance
     try:
         r = int(color[0:2], 16)
         g = int(color[2:4], 16)
@@ -962,12 +1060,7 @@ def _check_menu_button_exists() -> bool:
 
 
 def _wait_for_order_popup() -> str:
-    """
-    After clicking finalize, poll y=177 scanning across X for the
-    green (success) or red (fail) popup that fades in and out.
-    
-    Returns: "green" | "red" | "timeout"
-    """
+    """After clicking finalize, poll for green (success) or red (fail) popup."""
     start = time.time()
     print(f"    Waiting for order popup (up to {ORDER_POPUP_TIMEOUT}s)...")
 
@@ -995,28 +1088,6 @@ def _wait_for_order_popup() -> str:
 
 
 # ─── Sell helpers ──────────────────────────────────────────────────────────
-
-def navigate_to_inventory(rarity: str = "silver"):
-    """Profile (reset) → Profile → Inventory → Filter by rarity."""
-    print("  Resetting profile page...")
-    click_and_wait(BTN_PROFILE, 1.5)
-    click_and_wait(BTN_PROFILE, 3.0)
-
-    print("  Opening inventory...")
-    click_and_wait(BTN_INVENTORY, 2.5)
-
-    print(f"  Filtering to {rarity}...")
-    click_and_wait(BTN_FILTER_OPEN, 1.5)
-    click_and_wait(BTN_FILTER_RARITY, 1.5)
-    click_and_wait(BTN_FILTER_DROPDOWN, 1.5)
-    if rarity == "diamond":
-        click_and_wait(BTN_FILTER_DIAMOND, 1.5)
-    elif rarity == "gold":
-        click_and_wait(BTN_FILTER_GOLD, 1.5)
-    else:
-        click_and_wait(BTN_FILTER_SILVER, 1.5)
-    click_and_wait(BTN_FILTER_SHOW, 2.5)
-
 
 def swipe_refresh(scrolls_to_reverse: int = 0):
     """Scroll back to top if needed, then pull-to-refresh the inventory list."""
@@ -1046,21 +1117,14 @@ def read_card_name() -> str:
 
 
 def read_card_name_and_price() -> tuple[str, int | None]:
-    """
-    OCR both card name and price in parallel from a single ADB screenshot.
-    Crops both regions, then runs Tesseract simultaneously.
-    Returns (name, price) — either may be empty/None.
-    """
+    """OCR both card name and price in parallel from a single ADB screenshot."""
     from concurrent.futures import ThreadPoolExecutor
 
-    # 1. Single ADB screenshot
     adb_screen.invalidate_cache()
     full_img = adb_screen.screenshot()
 
-    # 2. Crop name region
     name_img = full_img.crop(CARD_NAME_BOX)
 
-    # 3. Crop price region with stubs logo removal
     logo_y = (CARD_PRICE_BOX[1] + CARD_PRICE_BOX[3]) // 2
     rightmost_logo = None
     for x in range(CARD_PRICE_BOX[0], CARD_PRICE_BOX[2]):
@@ -1074,7 +1138,6 @@ def read_card_name_and_price() -> tuple[str, int | None]:
     w, h = price_img.size
     price_img = price_img.resize((w * 2, h * 2), Image.NEAREST)
 
-    # 4. OCR both in parallel
     def _ocr_name(img):
         return pytesseract.image_to_string(img, config="--psm 7").strip()
 
@@ -1096,14 +1159,13 @@ def read_card_name_and_price() -> tuple[str, int | None]:
     return card_name, card_price
 
 
-# ─── Sell one card ─────────────────────────────────────────────────────────
+# ─── UUID helpers ──────────────────────────────────────────────────────────
 
 def _get_uuids_from_map(uuid_map: dict, card_name: str, rarity: str) -> list[str]:
     """
     Look up UUIDs for a card name + rarity from uuid_map.
     Handles both old format (name→rarity→str) and new format (name→rarity→[str,...]).
     Falls back to fuzzy/similarity matching if exact name not found.
-    Returns list of UUID strings (may be empty).
     """
     import re
     from difflib import SequenceMatcher
@@ -1140,10 +1202,8 @@ def _get_uuids_from_map(uuid_map: dict, card_name: str, rarity: str) -> list[str
         map_clean = re.sub(r'[^a-zA-Z ]', '', strip_accents(map_name)).lower().strip()
         map_parts = map_clean.split()
 
-        # Full name substring match
         matched = card_clean in map_clean or map_clean in card_clean
 
-        # Last name + first initial fallback (prevents "Elmer Rodriguez" → "Julio Rodriguez")
         if not matched and card_last and card_last in map_clean:
             if card_first_initial and map_parts and map_parts[0][0:1] == card_first_initial:
                 matched = True
@@ -1167,10 +1227,7 @@ def _get_uuids_from_map(uuid_map: dict, card_name: str, rarity: str) -> list[str
 
 
 def _pick_uuid_by_price(uuids: list[str], screen_price: int) -> str | None:
-    """
-    Given multiple UUIDs and a price OCR'd from the card page,
-    fetch the API buy price for each and return the closest match.
-    """
+    """Given multiple UUIDs and a screen price, return the closest API match."""
     best_uuid = None
     best_diff = float('inf')
 
@@ -1194,392 +1251,148 @@ def _pick_uuid_by_price(uuids: list[str], screen_price: int) -> str | None:
     return None
 
 
-def sell_one_card(quad_num: int, uuid_map: dict, rarity: str = "silver",
-                  known_unsellable: set = None) -> dict:
-    """
-    Open the card at the given quadrant, try to sell it,
-    and check the result via the green/red popup.
+# ─── OVR inventory filter ────────────────────────────────────────────────
 
-    known_unsellable: set of card names already confirmed unsellable.
-      After OCR'ing the name, if it's in this set, returns immediately.
-
-    Handles duplicate card names by OCR'ing the buy price on the card page
-    and matching against API prices for each UUID.
-
-    Returns dict with:
-      success: bool
-      name: str or None
-      price: int or None
-      reason: "ok" | "unsellable" | "known_unsellable" | "no_uuid" | "no_price" | "ocr_fail" | "error"
-    """
-    if known_unsellable is None:
-        known_unsellable = set()
-
-    result = {"success": False, "name": None, "price": None, "reason": "error"}
-    quad_label = ['TL', 'TR', 'BL', 'BR'][quad_num - 1]
-
-    # Step 1: Click the quadrant to open the card
-    print(f"    [1] Opening card in quad {quad_num} ({quad_label})...")
-    click_quad(quad_num)
-
-    # Step 2: OCR the card name
-    print("    [2] Reading card name...")
-    card_name = read_card_name()
-    if card_name:
-        result["name"] = card_name
-    else:
-        print("    [2] Could not read card name. Skipping.")
-        click(BTN_CLOSE_CARD, 1.0)
-        result["reason"] = "ocr_fail"
-        return result
-
-    # Step 2b: Fast skip if known unsellable
-    if card_name in known_unsellable:
-        print(f"    [2b] '{card_name}' is known unsellable — skipping.")
-        click(BTN_CLOSE_CARD, 1.0)
-        result["reason"] = "known_unsellable"
-        return result
-
-    # Step 3: Check if menu button exists
-    print("    [3] Checking for menu button...")
-    if not _check_menu_button_exists():
-        print(f"    [3] No menu button — '{card_name}' has no market. Unsellable.")
-        click(BTN_CLOSE_CARD, 1.0)
-        result["reason"] = "unsellable"
-        return result
-
-    # Step 4: Look up UUID(s)
-    uuids = _get_uuids_from_map(uuid_map, card_name, rarity)
-    if not uuids:
-        print(f"    [4] No UUID found for '{card_name}'. Skipping.")
-        click(BTN_CLOSE_CARD, 1.0)
-        result["reason"] = "no_uuid"
-        return result
-
-    # Step 5: Determine correct UUID and fetch price
-    if len(uuids) == 1:
-        uuid = uuids[0]
-        print(f"    [4] Single UUID: {uuid[:12]}...")
-    else:
-        print(f"    [4] {len(uuids)} UUIDs for '{card_name}' ({rarity}) — disambiguating by price...")
-        screen_price = ocr_card_price()
-        if screen_price is None:
-            print(f"    [4] Could not OCR price — using first UUID.")
-            uuid = uuids[0]
-        else:
-            print(f"    [4] Screen price: {screen_price:,}")
-            uuid = _pick_uuid_by_price(uuids, screen_price)
-            if uuid is None:
-                print(f"    [4] No UUID matched screen price. Using first.")
-                uuid = uuids[0]
-            else:
-                print(f"    [4] Matched UUID: {uuid[:12]}...")
-
-    print(f"    [5] Fetching fresh price for {card_name}...")
-    try:
-        listing = fetch_single_listing(uuid)
-        buy_now_raw = listing.get("best_sell_price")
-        sell_now_raw = listing.get("best_buy_price")
-        if buy_now_raw is None or buy_now_raw == "-":
-            print(f"    No buy_now price. Skipping.")
-            click(BTN_CLOSE_CARD, 1.0)
-            result["reason"] = "no_price"
-            return result
-        buy_now = int(buy_now_raw)
-        sell_now = int(sell_now_raw) if sell_now_raw and sell_now_raw != "-" else None
-    except Exception as e:
-        print(f"    API error: {e}")
-        click(BTN_CLOSE_CARD, 1.0)
-        return result
-
-    price = buy_now - 1
-    result["price"] = price
-
-    # For gold/diamond: log the full spread so we can see if it's still worth selling
-    if rarity in ("gold", "diamond") and sell_now is not None:
-        revenue_after_tax = int(price * 0.9)
-        cost = sell_now + 1
-        expected_profit = revenue_after_tax - cost
-        expected_pct = (expected_profit / cost) * 100 if cost > 0 else 0
-        print(f"    [5] {rarity.title()} sell: at {price:,} → after tax {revenue_after_tax:,}, "
-              f"buy cost ~{cost:,}, spread={expected_profit:,} ({expected_pct:.1f}%)")
-    else:
-        print(f"    [5] Buy Now: {buy_now} → Sell at: {price}")
-
-    # Step 6: Open menu → order dialog
-    print("    [6] Opening menu...")
-    click_and_wait(BTN_MENU, 1.5)
-    print("    [6] Opening order dialog...")
-    click_and_wait(BTN_BUY_ORDER, 3.0)
-
-    # Step 7: Sell tab
-    print("    [7] Switching to sell tab...")
-    click_and_wait(BTN_SELL_TAB, 1.0)
-
-    # Step 8: Type price
-    print(f"    [8] Typing price: {price}")
-    click(BTN_PRICE_INPUT, 0.5)
-    adb_clear_field()
-    time.sleep(0.2)
-    adb_text(str(price))
-    time.sleep(0.5)
-
-    # Step 9: Finalize
-    print("    [9] Clicking finalize...")
-    adb_screen.tap(BTN_FINALIZE[0], BTN_FINALIZE[1], delay=0.1)
-
-    # Step 10: Check popup
-    popup = _wait_for_order_popup()
-
-    if popup == "green":
-        print(f"    [10] Sell order placed!")
-        result["success"] = True
-        result["reason"] = "ok"
-    elif popup == "red":
-        print(f"    [10] Sell FAILED — card is unsellable.")
-        result["reason"] = "unsellable"
-    else:
-        print(f"    [10] No popup detected — assuming failure.")
-        result["reason"] = "unsellable"
-
-    # Step 11: Close
-    time.sleep(0.5)
-    print("    [11] Closing dialog...")
-    click(BTN_CLOSE_DIALOG, 1.0)
-    print("    [11] Closing card...")
-    click(BTN_CLOSE_CARD, 1.0)
-
-    return result
-
-
-# ─── Main sell loop ────────────────────────────────────────────────────────
-
-def run_sell_orders(skip_clear: bool = False, rarity: str = "silver",
-                    max_scrolls: int = None):
-    """
-    Full sell loop — sweeps entire inventory per pass, refreshes only between passes.
-
-    Each pass:
-      1. Start at top of inventory
-      2. Check all 4 quads, sell what we can, note unsellable names
-      3. Scroll down, check new bottom row (quads 3-4)
-      4. Continue until end of inventory (empty slot or stale scroll)
+def _apply_ovr_filter(min_ovr: int = 80, max_ovr: int | None = None):
+    """Apply the OVR filter in the inventory filter panel.
     
-    Between passes:
-      - If any sales made: refresh to top, start new pass
-        (sold cards are removed from grid on refresh, new cards may appear)
-      - If zero sales: all remaining cards are unsellable — done
-    
-    Known unsellable names persist across passes so we can skip them
-    quickly (click in → OCR → known name → close) without going through
-    the full sell flow again.
+    min_ovr=80: Gold + Diamond mode (3 swipes down, click 80)
+    min_ovr=74: All Tiers / Silver mode (3 swipes down, click 74)
+    max_ovr=79: Silver only mode (also caps top OVR to exclude gold/diamond)
     """
-    uuid_map = load_uuid_map()
-    if not uuid_map:
-        return
+    label = f"OVR {min_ovr}+"
+    if max_ovr:
+        label = f"OVR {min_ovr}-{max_ovr}"
+    print(f"  Applying {label} filter...")
 
-    if max_scrolls is None:
-        max_scrolls = MAX_SCROLL_ATTEMPTS
-
-    print()
-    print("=" * 55)
-    print(f"  Emulator Sell Automation ({rarity.upper()})")
-    print(EMU_WARNING)
-    print("=" * 55)
-    print(f"  UUID map: {len(uuid_map)} cards")
-    print(f"  Strategy: buy_now - 1 (undercut lowest sell order)")
-    print(f"  Sellability: attempt sell → check green/red popup")
-    print(f"  Max scrolls per pass: {max_scrolls}")
-    print()
-    print("  Press Ctrl+C to abort!")
-    print("  Starting in 3 seconds...")
-    time.sleep(3)
-
-    # 1. Clear sell orders
-    if not skip_clear:
-        clear_sell_orders()
-
-    # 2. Navigate to inventory
-    navigate_to_inventory(rarity)
-
-    # 3. Sell passes
-    total_sold = 0
-    total_skipped = 0
-    total_errors = 0
-    sold_names = []
-    unsellable_names = set()  # persists across passes for fast skip
-    pass_num = 0
-
-    while True:
-        pass_num += 1
-        sold_this_pass = 0
-        scrolls_done = 0
-        prev_bottom_names = None
-        start_quad = 1  # first screen starts at quad 1
-        hit_end = False
-
-        print(f"\n{'=' * 55}")
-        print(f"  PASS #{pass_num} (known unsellable: {len(unsellable_names)})")
-        print(f"{'=' * 55}")
-
-        while not hit_end:
-            # Do we need to scroll first? (not on first screen of the pass)
-            if start_quad == 3:
-                # We already checked quads 1-4, need to scroll for new bottom row
-                if scrolls_done >= max_scrolls:
-                    print(f"\n  Max scrolls ({max_scrolls}) reached for this pass.")
-                    break
-
-                scroll_inventory_down()
-                scrolls_done += 1
-                time.sleep(1.5)  # settle
-
-            print(f"\n  --- Checking quads {start_quad}-4 "
-                  f"(scroll {scrolls_done}, sold this pass: {sold_this_pass}) ---")
-
-            quad_names = {}
-
-            for q in range(start_quad, 5):
-                quad_label = ['TL', 'TR', 'BL', 'BR'][q - 1]
-
-                # Check if card exists
-                print(f"\n    Checking quad {q} ({quad_label})...")
-                if not has_card_in_quad(q):
-                    print(f"    Quad {q}: empty — end of inventory")
-                    hit_end = True
-                    break
-
-                # Try to sell (sell_one_card handles known unsellable skip internally)
-                result = sell_one_card(q, uuid_map, rarity=rarity,
-                                       known_unsellable=unsellable_names)
-
-                if result["name"]:
-                    quad_names[q] = result["name"]
-
-                if result["success"]:
-                    sold_this_pass += 1
-                    total_sold += 1
-                    if result["name"]:
-                        sold_names.append(result["name"])
-                    print(f"    ✓ Sold: {result['name']} at {result['price']}")
-
-                elif result["reason"] in ("unsellable", "known_unsellable"):
-                    if result["name"]:
-                        unsellable_names.add(result["name"])
-
-                elif result["reason"] in ("no_uuid", "ocr_fail", "no_price"):
-                    total_skipped += 1
-                    if result["name"]:
-                        unsellable_names.add(result["name"])
-                else:
-                    total_errors += 1
-
-                time.sleep(0.3)
-
-            # Stale scroll detection (only after we've scrolled at least once)
-            if not hit_end and scrolls_done > 0:
-                current_bottom_names = set()
-                for bq in (3, 4):
-                    if bq in quad_names:
-                        current_bottom_names.add(quad_names[bq])
-
-                if prev_bottom_names is not None and current_bottom_names and \
-                   current_bottom_names == prev_bottom_names:
-                    print(f"\n  Bottom row unchanged after scroll — end of inventory.")
-                    hit_end = True
-
-                prev_bottom_names = current_bottom_names if current_bottom_names else prev_bottom_names
-
-            # After first screen, only check new bottom row on scroll
-            start_quad = 3
-
-        # End of pass
-        print(f"\n  Pass #{pass_num} complete: sold {sold_this_pass}, "
-              f"unsellable {len(unsellable_names)}")
-
-        if sold_this_pass == 0:
-            print(f"  No sales this pass — all remaining cards are unsellable. Done.")
-            break
-
-        # Sales were made — refresh to top for next pass
-        # Inventory will repack without the sold cards
-        print(f"\n  Refreshing inventory for next pass...")
-        swipe_refresh(scrolls_done)
-
-    print()
-    print("=" * 55)
-    print(f"  Done!")
-    print(f"    Sold:       {total_sold}")
-    print(f"    Skipped:    {total_skipped}")
-    print(f"    Errors:     {total_errors}")
-    print(f"    Unsellable: {len(unsellable_names)}")
-    print(f"    Passes:     {pass_num}")
-    print("=" * 55)
-
-    return {"sold": total_sold, "skipped": total_skipped, "errors": total_errors, "sold_names": sold_names}
-
-
-# ─── Deep Pockets inventory filter (OVR 80+) ─────────────────────────────
-BTN_DP_FILTER_OVR_SECTION = _c("BTN_DP_FILTER_OVR_SECTION", (-369, 672))
-BTN_DP_FILTER_OVR_NUMBER = _c("BTN_DP_FILTER_OVR_NUMBER", (-311, 758))
-BTN_DP_FILTER_OVR_80 = _c("BTN_DP_FILTER_OVR_80", (633, 110))
-BTN_DP_FILTER_OVR_CONFIRM = _c("BTN_DP_FILTER_OVR_CONFIRM", (-322, 124))
-# Reuses BTN_FILTER_OPEN and BTN_FILTER_SHOW from sell flow
-
-
-# ─── Deep Pockets sell flow ────────────────────────────────────────────────
-
-def _apply_ovr_filter():
-    """Apply the 80+ OVR filter in the inventory filter panel."""
-    print("  Applying OVR 80+ filter...")
     click_and_wait(BTN_FILTER_OPEN, 1.5)
-    click_and_wait(BTN_DP_FILTER_OVR_SECTION, 1.5)
-    click_and_wait(BTN_DP_FILTER_OVR_NUMBER, 1.5)
-    # Drag the number picker down to increase to 80
-    # Long slow swipes downward 800px each
-    for i in range(3):
+    click_and_wait(BTN_FILTER_OVR_SECTION, 1.5)
+
+    # ── Set min OVR ──
+    click_and_wait(BTN_FILTER_OVR_NUMBER, 1.5)
+
+    num_swipes = OVR_SWIPES.get(min_ovr, 3)
+    for i in range(num_swipes):
         adb_screen.swipe(
-            BTN_DP_FILTER_OVR_NUMBER[0], BTN_DP_FILTER_OVR_NUMBER[1],
-            BTN_DP_FILTER_OVR_NUMBER[0], BTN_DP_FILTER_OVR_NUMBER[1] + 800,
+            BTN_FILTER_OVR_NUMBER[0], BTN_FILTER_OVR_NUMBER[1],
+            BTN_FILTER_OVR_NUMBER[0], BTN_FILTER_OVR_NUMBER[1] + 800,
             duration_ms=500, delay=0.5
         )
-    # Click 80
-    click_and_wait(BTN_DP_FILTER_OVR_80, 1.0)
-    click_and_wait(BTN_DP_FILTER_OVR_CONFIRM, 1.5)
+
+    if min_ovr == 74:
+        click_and_wait(BTN_FILTER_OVR_74, 1.0)
+    else:
+        click_and_wait(BTN_FILTER_OVR_80, 1.0)
+
+    click_and_wait(BTN_FILTER_OVR_CONFIRM, 1.5)
+
+    # ── Set max OVR (if specified) ──
+    if max_ovr is not None:
+        print(f"  Setting max OVR to {max_ovr}...")
+        click_and_wait(BTN_FILTER_OVR_MAX_NUMBER, 1.5)
+
+        # Half swipe in the OPPOSITE direction (upward = decrease value)
+        swipe_y = BTN_FILTER_OVR_MAX_NUMBER[1]
+        swipe_x = BTN_FILTER_OVR_MAX_NUMBER[0]
+        adb_screen.swipe(
+            swipe_x, swipe_y,
+            swipe_x, swipe_y - 400,
+            duration_ms=500, delay=1.0
+        )
+
+        # Click the target max OVR value
+        click_and_wait(BTN_FILTER_OVR_MAX_VALUE, 1.0)
+        click_and_wait(BTN_FILTER_OVR_CONFIRM, 1.5)
+
     click_and_wait(BTN_FILTER_SHOW, 2.5)
 
 
-def _navigate_to_inventory_deep_pockets():
-    """Profile → Inventory → OVR 80+ filter."""
+def _navigate_to_inventory_filtered(min_ovr: int = 80, max_ovr: int | None = None):
+    """Profile → Inventory → OVR filter."""
     print("  Resetting profile page...")
     click_and_wait(BTN_PROFILE, 1.5)
     click_and_wait(BTN_PROFILE, 3.0)
     print("  Opening inventory...")
     click_and_wait(BTN_INVENTORY, 2.5)
-    _apply_ovr_filter()
+    _apply_ovr_filter(min_ovr, max_ovr)
 
 
-def _reset_inventory_deep_pockets():
-    """Exit inventory and re-enter with OVR 80+ filter to reset to top."""
+def _reset_inventory_filtered(min_ovr: int = 80, max_ovr: int | None = None):
+    """Exit inventory and re-enter with OVR filter to reset to top."""
     print("    Resetting inventory (back → re-enter → filter)...")
-    click(BTN_CLOSE_CARD, 1.5)  # back arrow on inventory page → profile
+    click(BTN_CLOSE_CARD, 1.5)
     click_and_wait(BTN_INVENTORY, 2.5)
-    _apply_ovr_filter()
+    _apply_ovr_filter(min_ovr, max_ovr)
 
 
-def run_deep_pockets_sell(skip_clear: bool = False, max_scrolls: int = None):
+# ─── Unsellable tracking helpers ───────────────────────────────────────────
+
+# Bucket size for price-based unsellable tracking.
+# Same-name cards at different rarities have very different prices
+# (e.g. silver ~500, gold ~5000, diamond ~50000), so 500 is wide enough
+# to absorb OCR noise but narrow enough to distinguish rarities.
+_PRICE_BUCKET_SIZE = 500
+_NO_MARKET_BUCKET = -1  # sentinel for cards with no menu button / no market
+
+
+def _price_bucket(price: int | None) -> int | None:
+    """Convert a price to a bucket index. Returns None if price is unknown."""
+    if price is None:
+        return None
+    return price // _PRICE_BUCKET_SIZE
+
+
+def _mark_unsellable(unsellable: dict, name: str, price: int | None,
+                     no_market: bool = False):
+    """Record a card as unsellable.
+    
+    no_market=True: card has no menu button / no market presence at all.
+    Stored with a special sentinel so ANY future encounter of this name
+    with no price gets skipped. Cards with a price still check by bucket.
     """
-    Deep Pockets sell flow — sells golds and diamonds from OVR 80+ filtered inventory.
+    if name not in unsellable:
+        unsellable[name] = set()
 
-    Opens inventory with OVR 80+ filter (covers all gold/diamond cards).
-    For each card: tries to find a diamond UUID first, then gold. If neither
-    exists, skips the card. Sells everything it can find a gold/diamond UUID for.
+    if no_market:
+        unsellable[name].add(_NO_MARKET_BUCKET)
+        return
 
-    To reset between passes: exits inventory via back button, re-enters,
-    and re-applies the OVR 80+ filter.
+    bucket = _price_bucket(price)
+    if bucket is not None:
+        unsellable[name].add(bucket)
 
-    Stops when a full pass makes zero sales (all gold/diamond cards are
-    either sold or unsellable).
+
+def _is_known_unsellable(unsellable: dict, name: str, price: int | None) -> bool:
+    """Check if this specific card (name + price) was already marked unsellable."""
+    if name not in unsellable:
+        return False
+    buckets = unsellable[name]
+
+    # If card has no price, check if it was marked as no-market
+    if price is None:
+        return _NO_MARKET_BUCKET in buckets
+
+    # Card has a price — check by price bucket
+    bucket = _price_bucket(price)
+    return bucket in buckets
+
+
+# ─── Main sell loop ────────────────────────────────────────────────────────
+
+def run_sell_orders(skip_clear: bool = False, include_silver: bool = False,
+                    silver_only: bool = False, max_scrolls: int = None):
+    """
+    Sell flow — sells cards from OVR-filtered inventory.
+
+    include_silver=False: OVR 80+ filter, tries diamond → gold UUIDs
+    include_silver=True:  OVR 74+ filter, tries diamond → gold → silver UUIDs
+    silver_only=True:     OVR 74-79 filter, tries silver UUIDs only
+
+    Opens inventory with OVR filter. For each card: OCR name + price,
+    find matching UUID, place sell order.
+
+    Between passes: exits and re-enters inventory with filter to reset.
+    Stops when a full pass makes zero sales.
     """
     uuid_map = load_uuid_map()
     if not uuid_map:
@@ -1588,15 +1401,32 @@ def run_deep_pockets_sell(skip_clear: bool = False, max_scrolls: int = None):
     if max_scrolls is None:
         max_scrolls = MAX_SCROLL_ATTEMPTS
 
+    if silver_only:
+        min_ovr = 74
+        max_ovr = 79
+        rarity_label = "SILVER ONLY"
+        rarity_search_order = ("silver",)
+    elif include_silver:
+        min_ovr = 74
+        max_ovr = None
+        rarity_label = "ALL TIERS"
+        rarity_search_order = ("diamond", "gold", "silver")
+    else:
+        min_ovr = 80
+        max_ovr = None
+        rarity_label = "GOLD + DIAMOND"
+        rarity_search_order = ("diamond", "gold")
+
+    ovr_label = f"OVR {min_ovr}-{max_ovr}" if max_ovr else f"OVR {min_ovr}+"
+
     print()
     print("=" * 55)
-    print(f"  Deep Pockets Sell (GOLD + DIAMOND, OVR 80+ filter)")
+    print(f"  Sell Automation ({rarity_label}, {ovr_label} filter)")
     print(EMU_WARNING)
     print("=" * 55)
     print(f"  UUID map: {len(uuid_map)} cards")
     print(f"  Strategy: buy_now - 1 (undercut lowest sell order)")
-    print(f"  Inventory: OVR 80+ filter, tries diamond UUID then gold for each card")
-    print(f"  Cards with no gold/diamond UUID are skipped")
+    print(f"  Rarity search order: {' → '.join(rarity_search_order)}")
     print(f"  Max scrolls per pass: {max_scrolls}")
     print()
     print("  Press Ctrl+C to abort!")
@@ -1607,31 +1437,35 @@ def run_deep_pockets_sell(skip_clear: bool = False, max_scrolls: int = None):
     if not skip_clear:
         clear_sell_orders()
 
-    # 2. Navigate to inventory with OVR 80+ filter (covers gold + diamond)
-    _navigate_to_inventory_deep_pockets()
+    # 2. Navigate to inventory with OVR filter
+    _navigate_to_inventory_filtered(min_ovr, max_ovr)
 
     # 3. Sell passes
     total_sold = 0
     total_skipped = 0
     total_errors = 0
     sold_names = []
-    unsellable_names = set()  # persists across passes
+    unsellable = {}  # name → set of price buckets
     pass_num = 0
+
+    print(f"  Session fingerprint cache: {len(_session_unsellable_fps)} entries")
 
     while True:
         pass_num += 1
         sold_this_pass = 0
         scrolls_done = 0
-        prev_bottom_names = None
+        prev_bottom_fps = None  # fingerprints of bottom row for stale detection
         start_quad = 1
         hit_end = False
 
+        unsellable_count = sum(len(v) for v in unsellable.values())
+
         print(f"\n{'=' * 55}")
-        print(f"  DEEP POCKETS PASS #{pass_num} (known unsellable: {len(unsellable_names)})")
+        print(f"  SELL PASS #{pass_num} (known unsellable: {unsellable_count}, "
+              f"fingerprints: {len(_session_unsellable_fps)})")
         print(f"{'=' * 55}")
 
         while not hit_end:
-            # Scroll before checking bottom row (not on first screen)
             if start_quad == 3:
                 if scrolls_done >= max_scrolls:
                     print(f"\n  Max scrolls ({max_scrolls}) reached for this pass.")
@@ -1644,19 +1478,66 @@ def run_deep_pockets_sell(skip_clear: bool = False, max_scrolls: int = None):
             print(f"\n  --- Checking quads {start_quad}-4 "
                   f"(scroll {scrolls_done}, sold this pass: {sold_this_pass}) ---")
 
-            quad_names = {}
+            # ── Pre-scan: one screenshot, check all visible quads ──
+            adb_screen.invalidate_cache()
+            grid_img = adb_screen.screenshot()
+
+            quads_to_process = []
+            quad_fps = {}
+            dupe_quads = set()  # quads where dupe icon was detected
 
             for q in range(start_quad, 5):
                 quad_label = ['TL', 'TR', 'BL', 'BR'][q - 1]
 
-                # Check if card exists
-                print(f"\n    Checking quad {q} ({quad_label})...")
-                if not has_card_in_quad(q):
-                    print(f"    Quad {q}: empty — end of inventory")
+                if not _has_card_in_quad_from_image(q, grid_img):
+                    print(f"    Quad {q} ({quad_label}): empty — end of inventory")
                     hit_end = True
                     break
 
-                # Click in and OCR name + price in parallel
+                fp = _capture_fingerprint(q, grid_img)
+                quad_fps[q] = fp
+
+                if fp and _is_fingerprint_known(fp):
+                    # Fingerprint matches unsellable — but check for dupe icon
+                    has_dupe = _has_dupe_icon(q, grid_img)
+                    if has_dupe:
+                        print(f"    Quad {q} ({quad_label}): fingerprint match BUT dupe icon detected — will process")
+                        dupe_quads.add(q)
+                        quads_to_process.append(q)
+                    else:
+                        print(f"    Quad {q} ({quad_label}): fingerprint match, no dupe — skip")
+                else:
+                    quads_to_process.append(q)
+
+            # If all visible cards are known unsellable (no dupes), scroll past
+            if not hit_end and not quads_to_process:
+                print(f"    All visible cards are known unsellable — scrolling past")
+                # Stale scroll detection via fingerprints
+                if scrolls_done > 0:
+                    bottom_fps_list = [quad_fps[bq] for bq in (3, 4) if quad_fps.get(bq)]
+                    if prev_bottom_fps and len(bottom_fps_list) == len(prev_bottom_fps):
+                        all_same = all(
+                            _fingerprints_match(a, b)
+                            for a, b in zip(bottom_fps_list, prev_bottom_fps)
+                        )
+                        if all_same:
+                            print(f"\n  Bottom row fingerprints unchanged — end of inventory.")
+                            hit_end = True
+                    prev_bottom_fps = bottom_fps_list
+                start_quad = 3
+                continue
+
+            # ── Process only unknown cards (or dupes) ──
+            quad_names = {}
+            is_dupe = False  # track if current card has dupe copies
+
+            for q in quads_to_process:
+                quad_label = ['TL', 'TR', 'BL', 'BR'][q - 1]
+                is_dupe = q in dupe_quads
+                dupe_tag = " [DUPE]" if is_dupe else ""
+                print(f"\n    Processing quad {q} ({quad_label}){dupe_tag}...")
+
+                # Click in and OCR name + price
                 click_quad(q)
                 card_name, screen_price = read_card_name_and_price()
 
@@ -1670,32 +1551,34 @@ def run_deep_pockets_sell(skip_clear: bool = False, max_scrolls: int = None):
                     time.sleep(0.3)
                     continue
 
-                # Check if this is a known unsellable
-                if card_name in unsellable_names:
-                    print(f"    Known unsellable: '{card_name}' — skipping fast")
+                # Skip unsellable check if dupe icon was detected — we have extra copies to sell
+                if not is_dupe and _is_known_unsellable(unsellable, card_name, screen_price):
+                    print(f"    Known unsellable: '{card_name}' (price ~{screen_price}) — learning fingerprint")
+                    _store_unsellable_fingerprint(quad_fps.get(q))
                     click(BTN_CLOSE_CARD, 1.0)
                     time.sleep(0.3)
+                    _learn_fingerprint_from_grid(q)
                     continue
 
-                # Check menu button
                 if not _check_menu_button_exists():
                     print(f"    No menu button — '{card_name}' unsellable.")
-                    unsellable_names.add(card_name)
+                    _mark_unsellable(unsellable, card_name, screen_price, no_market=True)
+                    _store_unsellable_fingerprint(quad_fps.get(q))
                     click(BTN_CLOSE_CARD, 1.0)
                     time.sleep(0.3)
+                    _learn_fingerprint_from_grid(q)
                     continue
 
-                # Try to find UUID — use screen price to verify correct rarity
+                # Try to find UUID — search rarities in order
                 sell_rarity = None
                 uuid = None
 
-                for try_rarity in ("diamond", "gold"):
+                for try_rarity in rarity_search_order:
                     uuids = _get_uuids_from_map(uuid_map, card_name, try_rarity)
                     if not uuids:
                         continue
 
                     if len(uuids) == 1:
-                        # Single UUID — verify price matches if we have screen price
                         if screen_price is not None:
                             try:
                                 listing = fetch_single_listing(uuids[0])
@@ -1712,12 +1595,10 @@ def run_deep_pockets_sell(skip_clear: bool = False, max_scrolls: int = None):
                                     continue
                             except Exception:
                                 pass
-                        # No screen price — use it anyway
                         sell_rarity = try_rarity
                         uuid = uuids[0]
                         break
                     else:
-                        # Multiple UUIDs — disambiguate by price
                         print(f"    {len(uuids)} {try_rarity} UUIDs — disambiguating by price...")
                         if screen_price is not None:
                             matched = _pick_uuid_by_price(uuids, screen_price)
@@ -1728,124 +1609,176 @@ def run_deep_pockets_sell(skip_clear: bool = False, max_scrolls: int = None):
                             else:
                                 print(f"    No {try_rarity} UUID matched screen price — trying next rarity")
                                 continue
-                        # No screen price — use first
                         sell_rarity = try_rarity
                         uuid = uuids[0]
                         break
 
                 if not uuid:
-                    print(f"    No matching gold/diamond UUID for '{card_name}'. Skipping.")
+                    print(f"    No matching UUID for '{card_name}'. Skipping.")
+                    _store_unsellable_fingerprint(quad_fps.get(q))
                     click(BTN_CLOSE_CARD, 1.0)
                     time.sleep(0.3)
+                    _learn_fingerprint_from_grid(q)
                     continue
 
                 print(f"    Selling as {sell_rarity} (UUID: {uuid[:12]}...)")
 
-                # Fetch fresh price
-                try:
-                    listing = fetch_single_listing(uuid)
-                    buy_now_raw = listing.get("best_sell_price")
-                    sell_now_raw = listing.get("best_buy_price")
-                    if not buy_now_raw or buy_now_raw == "-":
-                        print(f"    No buy_now price. Skipping.")
-                        unsellable_names.add(card_name)
+                # ── Sell loop (handles duplicates: sell until red popup) ──
+                sell_attempt = 0
+                sold_any = False  # track if we sold at least one copy
+                while True:
+                    sell_attempt += 1
+
+                    # Fetch fresh price each attempt (market moves)
+                    try:
+                        listing = fetch_single_listing(uuid)
+                        buy_now_raw = listing.get("best_sell_price")
+                        sell_now_raw = listing.get("best_buy_price")
+                        if not buy_now_raw or buy_now_raw == "-":
+                            print(f"    No buy_now price. Stopping sell loop.")
+                            if not sold_any:
+                                _mark_unsellable(unsellable, card_name, screen_price)
+                                _store_unsellable_fingerprint(quad_fps.get(q))
+                            click(BTN_CLOSE_CARD, 1.0)
+                            time.sleep(0.3)
+                            if not sold_any:
+                                _learn_fingerprint_from_grid(q)
+                            total_skipped += 1
+                            break
+                        buy_now = int(buy_now_raw)
+                        sell_now = int(sell_now_raw) if sell_now_raw and sell_now_raw != "-" else None
+                    except Exception as e:
+                        print(f"    API error: {e}")
                         click(BTN_CLOSE_CARD, 1.0)
-                        total_skipped += 1
-                        continue
-                    buy_now = int(buy_now_raw)
-                    sell_now = int(sell_now_raw) if sell_now_raw and sell_now_raw != "-" else None
-                except Exception as e:
-                    print(f"    API error: {e}")
-                    click(BTN_CLOSE_CARD, 1.0)
-                    total_errors += 1
-                    continue
+                        total_errors += 1
+                        break
 
-                price = buy_now - 1
+                    price = buy_now - 1
 
-                # Log spread for gold/diamond
-                if sell_now is not None:
-                    revenue_after_tax = int(price * 0.9)
-                    cost = sell_now + 1
-                    expected_profit = revenue_after_tax - cost
-                    expected_pct = (expected_profit / cost) * 100 if cost > 0 else 0
-                    print(f"    {sell_rarity.title()} sell: at {price:,} → after tax {revenue_after_tax:,}, "
-                          f"buy cost ~{cost:,}, spread={expected_profit:,} ({expected_pct:.1f}%)")
-                else:
-                    print(f"    Buy Now: {buy_now} → Sell at: {price}")
+                    # Log spread
+                    if sell_now is not None:
+                        revenue_after_tax = int(price * 0.9)
+                        cost = sell_now + 1
+                        expected_profit = revenue_after_tax - cost
+                        expected_pct = (expected_profit / cost) * 100 if cost > 0 else 0
+                        print(f"    {sell_rarity.title()} sell #{sell_attempt}: at {price:,} → after tax {revenue_after_tax:,}, "
+                              f"buy cost ~{cost:,}, spread={expected_profit:,} ({expected_pct:.1f}%)")
+                    else:
+                        print(f"    Buy Now: {buy_now} → Sell at: {price}")
 
-                # Open menu → order dialog → sell tab → type price → finalize
-                click_and_wait(BTN_MENU, 1.5)
-                click_and_wait(BTN_BUY_ORDER, 3.0)
-                click_and_wait(BTN_SELL_TAB, 1.0)
-                click(BTN_PRICE_INPUT, 0.5)
-                adb_clear_field()
-                time.sleep(0.2)
-                adb_text(str(price))
-                time.sleep(0.5)
-                adb_screen.tap(BTN_FINALIZE[0], BTN_FINALIZE[1], delay=0.1)
+                    # Open menu → order dialog → sell tab → type price → finalize
+                    click_and_wait(BTN_MENU, 1.5)
+                    click_and_wait(BTN_BUY_ORDER, 3.0)
+                    click_and_wait(BTN_SELL_TAB, 1.0)
+                    click(BTN_PRICE_INPUT, 0.5)
+                    adb_clear_field()
+                    time.sleep(0.2)
+                    adb_text(str(price))
+                    time.sleep(0.5)
+                    adb_screen.tap(BTN_FINALIZE[0], BTN_FINALIZE[1], delay=0.1)
 
-                # Check popup
-                popup = _wait_for_order_popup()
+                    popup = _wait_for_order_popup()
 
-                if popup == "green":
-                    sold_this_pass += 1
-                    total_sold += 1
-                    sold_names.append(card_name)
-                    print(f"    ✓ Sold: {card_name} at {price:,} ({sell_rarity})")
-                elif popup == "red":
-                    print(f"    Sell FAILED — '{card_name}' unsellable.")
-                    unsellable_names.add(card_name)
-                else:
-                    print(f"    No popup — assuming failure.")
-                    unsellable_names.add(card_name)
+                    if popup == "green":
+                        sold_this_pass += 1
+                        total_sold += 1
+                        sold_any = True
+                        sold_names.append(card_name)
+                        print(f"    ✓ Sold: {card_name} at {price:,} ({sell_rarity}) [#{sell_attempt}]")
 
-                # Close dialog and card
-                time.sleep(0.5)
-                click(BTN_CLOSE_DIALOG, 1.0)
-                click(BTN_CLOSE_CARD, 1.0)
-                time.sleep(0.3)
+                        # Close dialog and card, then check grid for dupe icon
+                        time.sleep(0.5)
+                        click(BTN_CLOSE_DIALOG, 1.0)
+                        click(BTN_CLOSE_CARD, 1.0)
+                        time.sleep(0.5)
 
-            # Stale scroll detection
-            if not hit_end and scrolls_done > 0:
-                current_bottom_names = set()
-                for bq in (3, 4):
-                    if bq in quad_names:
-                        current_bottom_names.add(quad_names[bq])
+                        # Check if there's still a dupe icon on this quad
+                        adb_screen.invalidate_cache()
+                        fresh_img = adb_screen.screenshot()
+                        if _has_card_in_quad_from_image(q, fresh_img) and \
+                           _has_dupe_icon(q, fresh_img):
+                            print(f"    Dupe icon still present on quad {q} — selling another copy")
+                            click_quad(q)  # re-enter the card
+                            continue  # loop back to fetch price and sell again
+                        else:
+                            # Sold all extra copies. Don't fingerprint — if we
+                            # acquire another copy via flipping, dupe icon will
+                            # appear and the pre-scan will let it through.
+                            print(f"    No more dupe icon — done with this card")
+                            break
 
-                if prev_bottom_names is not None and current_bottom_names and \
-                   current_bottom_names == prev_bottom_names:
-                    print(f"\n  Bottom row unchanged after scroll — end of inventory.")
-                    hit_end = True
+                    elif popup == "red":
+                        if sold_any:
+                            # Red after selling = pending order / ran out of copies.
+                            # Don't fingerprint — next cycle dupe icon handles it.
+                            print(f"    Sell #{sell_attempt} failed — no more sellable copies (sold {sell_attempt - 1} earlier)")
+                        else:
+                            # First attempt red = unsellable this pass.
+                            # Fingerprint so we skip it from grid view.
+                            print(f"    Sell FAILED — '{card_name}' unsellable.")
+                            _mark_unsellable(unsellable, card_name, screen_price)
+                            _store_unsellable_fingerprint(quad_fps.get(q))
+                        time.sleep(0.5)
+                        click(BTN_CLOSE_DIALOG, 1.0)
+                        click(BTN_CLOSE_CARD, 1.0)
+                        time.sleep(0.3)
+                        if not sold_any:
+                            _learn_fingerprint_from_grid(q)
+                        break
 
-                prev_bottom_names = current_bottom_names if current_bottom_names else prev_bottom_names
+                    else:
+                        print(f"    No popup — assuming failure.")
+                        if not sold_any:
+                            _mark_unsellable(unsellable, card_name, screen_price)
+                            _store_unsellable_fingerprint(quad_fps.get(q))
+                        time.sleep(0.5)
+                        click(BTN_CLOSE_DIALOG, 1.0)
+                        click(BTN_CLOSE_CARD, 1.0)
+                        time.sleep(0.3)
+                        if not sold_any:
+                            _learn_fingerprint_from_grid(q)
+                        break
 
-            # After first screen, only check new bottom row on scroll
+            # Stale scroll detection (for screens with mixed sellable/unsellable)
+            if not hit_end and scrolls_done > 0 and quads_to_process:
+                bottom_fps_list = [quad_fps[bq] for bq in (3, 4) if quad_fps.get(bq)]
+                if prev_bottom_fps and len(bottom_fps_list) == len(prev_bottom_fps):
+                    all_same = all(
+                        _fingerprints_match(a, b)
+                        for a, b in zip(bottom_fps_list, prev_bottom_fps)
+                    )
+                    if all_same:
+                        print(f"\n  Bottom row fingerprints unchanged — end of inventory.")
+                        hit_end = True
+                prev_bottom_fps = bottom_fps_list if bottom_fps_list else prev_bottom_fps
+
             start_quad = 3
 
         # End of pass
+        unsellable_count = sum(len(v) for v in unsellable.values())
         print(f"\n  Pass #{pass_num} complete: sold {sold_this_pass}, "
-              f"unsellable {len(unsellable_names)}")
+              f"unsellable {unsellable_count}")
 
         if sold_this_pass == 0:
-            print(f"  No sales this pass — all gold/diamond cards are unsellable. Done.")
+            print(f"  No sales this pass — all remaining cards are unsellable. Done.")
             break
 
-        if hit_end:
-            print(f"  Hit end of inventory. Checking if another pass needed...")
-            if sold_this_pass == 0:
-                break
+        if hit_end and sold_this_pass == 0:
+            break
 
-        # Reset inventory for next pass (back out and re-enter)
-        _reset_inventory_deep_pockets()
+        # Reset inventory for next pass
+        _reset_inventory_filtered(min_ovr, max_ovr)
 
+    unsellable_total = sum(len(v) for v in unsellable.values())
     print()
     print("=" * 55)
-    print(f"  Deep Pockets Sell Done!")
-    print(f"    Sold:       {total_sold}")
-    print(f"    Skipped:    {total_skipped}")
-    print(f"    Errors:     {total_errors}")
-    print(f"    Unsellable: {len(unsellable_names)}")
-    print(f"    Passes:     {pass_num}")
+    print(f"  Sell Done!")
+    print(f"    Sold:         {total_sold}")
+    print(f"    Skipped:      {total_skipped}")
+    print(f"    Errors:       {total_errors}")
+    print(f"    Unsellable:   {unsellable_total}")
+    print(f"    Fingerprints: {len(_session_unsellable_fps)} (session)")
+    print(f"    Passes:       {pass_num}")
     print("=" * 55)
 
     return {"sold": total_sold, "skipped": total_skipped, "errors": total_errors, "sold_names": sold_names}

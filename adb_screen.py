@@ -9,10 +9,17 @@ All coordinates are in the emulator's internal resolution (from emulator_coords.
 
 import io
 import subprocess
+import sys
 import time
 from PIL import Image
 
 ADB_DEVICE = "127.0.0.1:7555"
+
+# Suppress console window on Windows
+_NO_WINDOW = 0
+if sys.platform == "win32":
+    _NO_WINDOW = subprocess.CREATE_NO_WINDOW
+
 
 # ─── ADB connection ──────────────────────────────────────────────────────
 
@@ -21,13 +28,23 @@ def adb_connect():
     subprocess.run(
         ["adb", "connect", ADB_DEVICE],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        creationflags=_NO_WINDOW,
+    )
+
+
+def _adb_raw(args: list[str], **kwargs) -> subprocess.CompletedProcess:
+    """Run an ADB command with no-window flag."""
+    return subprocess.run(
+        ["adb", "-s", ADB_DEVICE] + args,
+        creationflags=_NO_WINDOW,
+        **kwargs,
     )
 
 
 def adb_shell(cmd: str) -> str:
     """Run an ADB shell command, return stdout."""
-    result = subprocess.run(
-        ["adb", "-s", ADB_DEVICE, "shell"] + cmd.split(),
+    result = _adb_raw(
+        ["shell"] + cmd.split(),
         capture_output=True, text=True,
     )
     return result.stdout.strip()
@@ -54,8 +71,8 @@ def screenshot(fresh: bool = False) -> Image.Image:
     if not fresh and _cached_screenshot and (now - _cache_time) < CACHE_TTL:
         return _cached_screenshot
     
-    result = subprocess.run(
-        ["adb", "-s", ADB_DEVICE, "exec-out", "screencap", "-p"],
+    result = _adb_raw(
+        ["exec-out", "screencap", "-p"],
         capture_output=True,
     )
     img = Image.open(io.BytesIO(result.stdout))
