@@ -131,25 +131,11 @@ def fetch_all_inventory(session: requests.Session) -> list[dict]:
     return items
 
 
-def load_blacklist(path: str = "blacklist.txt") -> set[str]:
-    """Load card names to exclude from selling. One name per line."""
-    try:
-        with open(path, "r") as f:
-            return {line.strip() for line in f if line.strip()}
-    except FileNotFoundError:
-        return set()
-
-
 def get_sellable_silvers(inventory: list[dict]) -> list[dict]:
-    """Filter inventory to sellable silver cards with quantity > 0, minus blacklist."""
-    blacklist = load_blacklist()
-    if blacklist:
-        print(f"  Blacklist: {len(blacklist)} card(s)")
-
+    """Filter inventory to sellable silver cards with quantity > 0."""
     return [
         item for item in inventory
         if item.get("rarity", "").lower() == "silver"
         and item.get("is_sellable") is True
         and int(item.get("quantity", 0)) > 0
-        and item.get("name", "") not in blacklist
     ]

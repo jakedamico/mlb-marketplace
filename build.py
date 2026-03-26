@@ -42,7 +42,6 @@ def main():
     optional_files = [
         "emulator_coords.json",
         "cookies.json",
-        "blacklist.txt",
     ]
 
     # Build the arguments

@@ -5,37 +5,76 @@ Replaces pyautogui clicks, ctypes pixel reads, and ImageGrab screenshots
 with ADB commands that work without a visible display.
 
 All coordinates are in the emulator's internal resolution (from emulator_coords.json).
+
+Thread-safe: each thread can target a different ADB device via set_device().
+Screenshot cache and device address are stored in thread-local storage.
 """
 
 import io
 import subprocess
 import sys
+import threading
 import time
 from PIL import Image
 
-ADB_DEVICE = "127.0.0.1:7555"
+DEFAULT_DEVICE = "127.0.0.1:7555"
 
 # Suppress console window on Windows
 _NO_WINDOW = 0
 if sys.platform == "win32":
     _NO_WINDOW = subprocess.CREATE_NO_WINDOW
 
+# ─── Thread-local storage ─────────────────────────────────────────────────
+# Each thread gets its own ADB device address and screenshot cache so
+# multiple emulators can run concurrently without interfering.
+
+_tls = threading.local()
+
+CACHE_TTL = 0.3  # seconds — screenshot is valid for this long
+
+
+def set_device(device: str):
+    """Set the ADB device address for the current thread."""
+    _tls.device = device
+    _tls.cached_screenshot = None
+    _tls.cache_time = 0
+
+
+def get_device() -> str:
+    """Get the ADB device address for the current thread."""
+    return getattr(_tls, "device", DEFAULT_DEVICE)
+
+
+def _get_cache() -> tuple:
+    """Get cached screenshot and timestamp for the current thread."""
+    return (
+        getattr(_tls, "cached_screenshot", None),
+        getattr(_tls, "cache_time", 0),
+    )
+
+
+def _set_cache(img, t):
+    """Store screenshot cache for the current thread."""
+    _tls.cached_screenshot = img
+    _tls.cache_time = t
+
 
 # ─── ADB connection ──────────────────────────────────────────────────────
 
-def adb_connect():
-    """Connect to the ADB device."""
+def adb_connect(device: str = None):
+    """Connect to the ADB device. Uses thread-local device if not specified."""
+    d = device or get_device()
     subprocess.run(
-        ["adb", "connect", ADB_DEVICE],
+        ["adb", "connect", d],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         creationflags=_NO_WINDOW,
     )
 
 
 def _adb_raw(args: list[str], **kwargs) -> subprocess.CompletedProcess:
-    """Run an ADB command with no-window flag."""
+    """Run an ADB command with no-window flag, targeting the thread's device."""
     return subprocess.run(
-        ["adb", "-s", ADB_DEVICE] + args,
+        ["adb", "-s", get_device()] + args,
         creationflags=_NO_WINDOW,
         **kwargs,
     )
@@ -52,40 +91,34 @@ def adb_shell(cmd: str) -> str:
 
 # ─── Screenshot ───────────────────────────────────────────────────────────
 
-_cached_screenshot = None
-_cache_time = 0
-CACHE_TTL = 0.3  # seconds — screenshot is valid for this long
-
-
 def screenshot(fresh: bool = False) -> Image.Image:
     """
     Capture the emulator screen via ADB screencap.
     Caches the result for CACHE_TTL seconds to avoid redundant captures
     when multiple pixel reads or OCR calls happen in quick succession.
-    
+
     Set fresh=True to force a new capture.
     """
-    global _cached_screenshot, _cache_time
-    
+    cached_img, cache_time = _get_cache()
+
     now = time.time()
-    if not fresh and _cached_screenshot and (now - _cache_time) < CACHE_TTL:
-        return _cached_screenshot
-    
+    if not fresh and cached_img and (now - cache_time) < CACHE_TTL:
+        return cached_img
+
     result = _adb_raw(
         ["exec-out", "screencap", "-p"],
         capture_output=True,
     )
     img = Image.open(io.BytesIO(result.stdout))
-    _cached_screenshot = img.convert("RGB")
-    _cache_time = time.time()
-    return _cached_screenshot
+    rgb = img.convert("RGB")
+    _set_cache(rgb, time.time())
+    return rgb
 
 
 def invalidate_cache():
     """Force next screenshot() call to take a fresh capture."""
-    global _cached_screenshot, _cache_time
-    _cached_screenshot = None
-    _cache_time = 0
+    _tls.cached_screenshot = None
+    _tls.cache_time = 0
 
 
 # ─── Tap / Swipe ─────────────────────────────────────────────────────────
@@ -118,7 +151,6 @@ def swipe(x1: int, y1: int, x2: int, y2: int, duration_ms: int = 400, delay: flo
 def get_pixel(x: int, y: int) -> tuple[int, int, int]:
     """Get RGB tuple at ADB coordinates from cached screenshot."""
     img = screenshot()
-    # Clamp to image bounds
     x = max(0, min(x, img.width - 1))
     y = max(0, min(y, img.height - 1))
     return img.getpixel((x, y))
@@ -146,7 +178,6 @@ def grab_region(box: tuple[int, int, int, int]) -> Image.Image:
     Returns a cropped PIL Image.
     """
     img = screenshot()
-    # Clamp box to image bounds
     left = max(0, box[0])
     top = max(0, box[1])
     right = min(img.width, box[2])
