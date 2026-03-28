@@ -4,11 +4,9 @@ MLB The Show 26 — Marketplace Automation GUI
 Wraps the existing automation scripts with a modern GUI.
 Runs automation in background threads, logs to the GUI.
 
-Multi-emulator support:
-  - Select 1-4 emulators from the GUI
-  - Each emulator runs in its own thread, staggered by 120 seconds
-  - Default ADB ports: 7555, 7557, 7559, 7561 (override in emulator_coords.json)
-  - Thread-safe: each thread has its own device, screenshot cache, and state
+Single emulator: full sell+buy cycles as before.
+Two emulators: EMU 1 = dedicated seller, EMU 2 = dedicated buyer.
+  Each cancels its own order type between rounds.
 """
 
 import customtkinter as ctk
@@ -41,9 +39,6 @@ SILVER = "#94a3b8"
 # Default ADB ports for MuMu emulator instances
 DEFAULT_PORTS = [7555, 7557, 7559, 7561]
 
-# Stagger delay between emulator launches (seconds)
-STAGGER_DELAY = 120
-
 
 def _load_device_list() -> list[str]:
     """
@@ -65,23 +60,18 @@ class ThreadAwareRedirector:
     """
     Replaces sys.stdout to route print() output from multiple emulator
     threads into the GUI log queue with per-thread prefixes.
-
-    Each thread registers itself with a prefix like "[EMU 1]".
-    Non-registered threads fall through to the original stdout.
     """
     def __init__(self, log_queue: queue.Queue, original):
         self.queue = log_queue
         self.original = original
-        self._prefixes = {}  # thread_id -> prefix string
+        self._prefixes = {}
         self._lock = threading.Lock()
 
     def register(self, prefix: str):
-        """Register the current thread with a log prefix."""
         with self._lock:
             self._prefixes[threading.get_ident()] = prefix
 
     def unregister(self):
-        """Unregister the current thread."""
         with self._lock:
             self._prefixes.pop(threading.get_ident(), None)
 
@@ -94,7 +84,6 @@ class ThreadAwareRedirector:
         if prefix is not None:
             self.queue.put(f"{prefix}{text}")
         else:
-            # Non-bot thread — write to original stdout
             self.original.write(text)
 
     def flush(self):
@@ -131,7 +120,6 @@ class StatsTracker:
 
 
 class _DummyLock:
-    """No-op context manager for reset() before _lock exists."""
     def __enter__(self):
         return self
     def __exit__(self, *args):
@@ -143,8 +131,8 @@ class App(ctk.CTk):
         super().__init__()
 
         self.title("MLB The Show 26 — Marketplace Bot")
-        self.geometry("780x950")
-        self.minsize(700, 850)
+        self.geometry("1020x820")
+        self.minsize(900, 700)
         self.configure(fg_color=BG_DARK)
 
         self.log_queue = queue.Queue()
@@ -157,52 +145,63 @@ class App(ctk.CTk):
         self._redirector = None
         self._device_list = _load_device_list()
 
+        self.log_widgets = []
+
         self._build_ui()
         self._poll_log_queue()
 
     # ─── UI Layout ────────────────────────────────────────────────────
 
     def _build_ui(self):
-        # Header
-        header = ctk.CTkFrame(self, fg_color=BG_MID, corner_radius=0, height=60)
+        # ── Header ──
+        header = ctk.CTkFrame(self, fg_color=BG_MID, corner_radius=0, height=52)
         header.pack(fill="x")
         header.pack_propagate(False)
 
-        title_label = ctk.CTkLabel(
+        ctk.CTkLabel(
             header, text="MLB The Show 26",
-            font=ctk.CTkFont(family="Segoe UI", size=22, weight="bold"),
+            font=ctk.CTkFont(family="Segoe UI", size=20, weight="bold"),
             text_color=TEXT_PRIMARY,
-        )
-        title_label.pack(side="left", padx=20, pady=12)
+        ).pack(side="left", padx=20, pady=10)
 
-        subtitle = ctk.CTkLabel(
+        ctk.CTkLabel(
             header, text="MARKETPLACE BOT",
-            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
             text_color=ACCENT_BLUE,
-        )
-        subtitle.pack(side="left", padx=(0, 20), pady=12)
+        ).pack(side="left", padx=(0, 20), pady=10)
 
-        # Status indicator
         self.status_label = ctk.CTkLabel(
             header, text="● IDLE",
-            font=ctk.CTkFont(family="Consolas", size=13, weight="bold"),
+            font=ctk.CTkFont(family="Consolas", size=12, weight="bold"),
             text_color=TEXT_DIM,
         )
-        self.status_label.pack(side="right", padx=20, pady=12)
+        self.status_label.pack(side="right", padx=20, pady=10)
 
-        # Main content
-        content = ctk.CTkFrame(self, fg_color="transparent")
-        content.pack(fill="both", expand=True, padx=16, pady=(12, 16))
+        # ── Main content: left controls + right logs ──
+        body = ctk.CTkFrame(self, fg_color="transparent")
+        body.pack(fill="both", expand=True, padx=12, pady=(8, 12))
+        body.columnconfigure(0, weight=0, minsize=330)
+        body.columnconfigure(1, weight=1)
+        body.rowconfigure(0, weight=1)
 
+        left = ctk.CTkScrollableFrame(body, fg_color="transparent", width=320)
+        left.grid(row=0, column=0, sticky="nsew", padx=(0, 6))
+        self._build_controls(left)
+
+        self._right_frame = ctk.CTkFrame(body, fg_color="transparent")
+        self._right_frame.grid(row=0, column=1, sticky="nsew", padx=(6, 0))
+        self._build_log_panel()
+
+    def _build_controls(self, parent):
         # ── Mode selection ──
-        mode_frame = ctk.CTkFrame(content, fg_color=BG_CARD, corner_radius=10)
-        mode_frame.pack(fill="x", pady=(0, 10))
+        mode_frame = ctk.CTkFrame(parent, fg_color=BG_CARD, corner_radius=10)
+        mode_frame.pack(fill="x", pady=(0, 8))
 
         ctk.CTkLabel(
             mode_frame, text="MODE",
-            font=ctk.CTkFont(size=11, weight="bold"),
+            font=ctk.CTkFont(size=10, weight="bold"),
             text_color=TEXT_DIM,
-        ).pack(anchor="w", padx=14, pady=(10, 4))
+        ).pack(anchor="w", padx=12, pady=(8, 2))
 
         self.mode_var = ctk.StringVar(value="gold-diamond")
         modes = [
@@ -216,100 +215,119 @@ class App(ctk.CTk):
             ("Silver Only  (Buy → Sell)", "silver-buy", SILVER),
         ]
         for label, val, color in modes:
-            rb = ctk.CTkRadioButton(
+            ctk.CTkRadioButton(
                 mode_frame, text=label, variable=self.mode_var, value=val,
-                font=ctk.CTkFont(size=13),
+                font=ctk.CTkFont(size=12),
                 text_color=TEXT_PRIMARY,
-                fg_color=color,
-                hover_color=color,
+                fg_color=color, hover_color=color,
                 border_color=TEXT_DIM,
-                radiobutton_width=18, radiobutton_height=18,
-            )
-            rb.pack(anchor="w", padx=20, pady=3)
-
-        # Mode descriptions
-        desc_frame = ctk.CTkFrame(mode_frame, fg_color="transparent")
-        desc_frame.pack(fill="x", padx=20, pady=(6, 10))
+                radiobutton_width=16, radiobutton_height=16,
+            ).pack(anchor="w", padx=16, pady=2)
 
         ctk.CTkLabel(
-            desc_frame,
+            mode_frame,
             text=(
-                "Gold + Diamond: OVR 80+ filter, sells/buys gold and diamond cards\n"
-                "Gold + Silver: OVR 74-84 filter, sells/buys gold and silver cards\n"
-                "All Tiers: OVR 74+ filter, sells/buys silver, gold, and diamond cards\n"
-                "Silver Only: OVR 74-79 filter, sells/buys silver cards only\n"
-                "Buy order: Diamond → Gold → Silver"
+                "Buy order: Diamond → Gold → Silver\n"
+                "Gold+Diamond: OVR 80+  |  All: OVR 74+\n"
+                "Gold+Silver: OVR 74-84  |  Silver: OVR 74-79"
             ),
-            font=ctk.CTkFont(size=11),
+            font=ctk.CTkFont(size=10),
+            text_color=TEXT_DIM, justify="left",
+        ).pack(anchor="w", padx=16, pady=(4, 8))
+
+        # ── Diamond settings ──
+        diamond_frame = ctk.CTkFrame(parent, fg_color=BG_CARD, corner_radius=10)
+        diamond_frame.pack(fill="x", pady=(0, 8))
+
+        ctk.CTkLabel(
+            diamond_frame, text="DIAMOND SETTINGS",
+            font=ctk.CTkFont(size=10, weight="bold"),
             text_color=TEXT_DIM,
-            justify="left",
-        ).pack(anchor="w")
+        ).pack(anchor="w", padx=12, pady=(8, 2))
+
+        dp_row = ctk.CTkFrame(diamond_frame, fg_color="transparent")
+        dp_row.pack(fill="x", padx=12, pady=(0, 8))
+
+        ctk.CTkLabel(
+            dp_row, text="Max buy price:",
+            font=ctk.CTkFont(size=12), text_color=TEXT_PRIMARY,
+        ).pack(side="left", padx=(0, 6))
+
+        self.max_diamond_price_var = ctk.StringVar(value="")
+        ctk.CTkEntry(
+            dp_row, textvariable=self.max_diamond_price_var,
+            font=ctk.CTkFont(family="Consolas", size=12),
+            fg_color=BG_DARK, text_color=TEXT_PRIMARY,
+            border_color=TEXT_DIM, placeholder_text="No limit",
+            width=100, height=28,
+        ).pack(side="left")
+
+        ctk.CTkLabel(
+            dp_row, text="stubs",
+            font=ctk.CTkFont(size=11), text_color=TEXT_DIM,
+        ).pack(side="left", padx=(4, 0))
 
         # ── Emulator count ──
-        emu_frame = ctk.CTkFrame(content, fg_color=BG_CARD, corner_radius=10)
-        emu_frame.pack(fill="x", pady=(0, 10))
+        emu_frame = ctk.CTkFrame(parent, fg_color=BG_CARD, corner_radius=10)
+        emu_frame.pack(fill="x", pady=(0, 8))
 
         ctk.CTkLabel(
             emu_frame, text="EMULATORS",
-            font=ctk.CTkFont(size=11, weight="bold"),
+            font=ctk.CTkFont(size=10, weight="bold"),
             text_color=TEXT_DIM,
-        ).pack(anchor="w", padx=14, pady=(10, 4))
+        ).pack(anchor="w", padx=12, pady=(8, 2))
 
-        emu_inner = ctk.CTkFrame(emu_frame, fg_color="transparent")
-        emu_inner.pack(fill="x", padx=14, pady=(0, 10))
+        emu_row = ctk.CTkFrame(emu_frame, fg_color="transparent")
+        emu_row.pack(fill="x", padx=12, pady=(0, 4))
 
         ctk.CTkLabel(
-            emu_inner, text="Count:",
-            font=ctk.CTkFont(size=13),
-            text_color=TEXT_PRIMARY,
-        ).pack(side="left", padx=(0, 8))
+            emu_row, text="Count:",
+            font=ctk.CTkFont(size=12), text_color=TEXT_PRIMARY,
+        ).pack(side="left", padx=(0, 6))
 
-        max_emus = min(4, len(self._device_list))
+        max_emus = min(2, len(self._device_list))
         self.emu_count_var = ctk.StringVar(value="1")
-        emu_options = [str(i) for i in range(1, max_emus + 1)]
-        emu_dropdown = ctk.CTkOptionMenu(
-            emu_inner, variable=self.emu_count_var, values=emu_options,
-            font=ctk.CTkFont(size=13),
+        ctk.CTkOptionMenu(
+            emu_row, variable=self.emu_count_var,
+            values=[str(i) for i in range(1, max_emus + 1)],
+            font=ctk.CTkFont(size=12),
             fg_color=BG_MID, button_color=ACCENT_BLUE,
-            button_hover_color="#1e5fa0",
-            dropdown_fg_color=BG_MID,
-            width=60, height=30,
+            button_hover_color="#1e5fa0", dropdown_fg_color=BG_MID,
+            width=55, height=28,
             command=self._on_emu_count_change,
-        )
-        emu_dropdown.pack(side="left")
+        ).pack(side="left")
 
         self.emu_ports_label = ctk.CTkLabel(
-            emu_inner,
+            emu_row,
             text=f"  Port: {self._device_list[0].split(':')[-1]}",
-            font=ctk.CTkFont(family="Consolas", size=11),
+            font=ctk.CTkFont(family="Consolas", size=10),
             text_color=TEXT_DIM,
         )
-        self.emu_ports_label.pack(side="left", padx=(12, 0))
+        self.emu_ports_label.pack(side="left", padx=(8, 0))
 
-        emu_desc = ctk.CTkLabel(
+        ctk.CTkLabel(
             emu_frame,
             text=(
-                f"Each emulator starts {STAGGER_DELAY}s apart. "
-                f"Override ports in emulator_coords.json → ADB_DEVICES array."
+                "1 emulator: full sell + buy cycles.\n"
+                "2 emulators: EMU 1 sells, EMU 2 buys.\n"
+                "Each cancels its own orders between rounds."
             ),
-            font=ctk.CTkFont(size=11),
-            text_color=TEXT_DIM,
-            justify="left",
-        )
-        emu_desc.pack(anchor="w", padx=14, pady=(0, 10))
+            font=ctk.CTkFont(size=10),
+            text_color=TEXT_DIM, justify="left",
+        ).pack(anchor="w", padx=12, pady=(0, 8))
 
         # ── Stats panel ──
-        stats_frame = ctk.CTkFrame(content, fg_color=BG_CARD, corner_radius=10)
-        stats_frame.pack(fill="x", pady=(0, 10))
+        stats_frame = ctk.CTkFrame(parent, fg_color=BG_CARD, corner_radius=10)
+        stats_frame.pack(fill="x", pady=(0, 8))
 
         ctk.CTkLabel(
             stats_frame, text="SESSION",
-            font=ctk.CTkFont(size=11, weight="bold"),
+            font=ctk.CTkFont(size=10, weight="bold"),
             text_color=TEXT_DIM,
-        ).pack(anchor="w", padx=14, pady=(10, 4))
+        ).pack(anchor="w", padx=12, pady=(8, 2))
 
         stats_grid = ctk.CTkFrame(stats_frame, fg_color="transparent")
-        stats_grid.pack(fill="x", padx=14, pady=(0, 10))
+        stats_grid.pack(fill="x", padx=8, pady=(0, 8))
         for i in range(5):
             stats_grid.columnconfigure(i, weight=1)
 
@@ -323,80 +341,119 @@ class App(ctk.CTk):
         self.stat_labels = {}
         for i, (title, key) in enumerate(stat_items):
             f = ctk.CTkFrame(stats_grid, fg_color="transparent")
-            f.grid(row=0, column=i, sticky="nsew", padx=4)
+            f.grid(row=0, column=i, sticky="nsew", padx=2)
             ctk.CTkLabel(
                 f, text=title,
-                font=ctk.CTkFont(size=10, weight="bold"),
+                font=ctk.CTkFont(size=9, weight="bold"),
                 text_color=TEXT_DIM,
             ).pack()
             val_label = ctk.CTkLabel(
                 f, text="0" if key != "elapsed" else "00:00:00",
-                font=ctk.CTkFont(family="Consolas", size=18, weight="bold"),
+                font=ctk.CTkFont(family="Consolas", size=15, weight="bold"),
                 text_color=TEXT_PRIMARY,
             )
             val_label.pack()
             self.stat_labels[key] = val_label
 
         # ── Control buttons ──
-        btn_frame = ctk.CTkFrame(content, fg_color="transparent")
-        btn_frame.pack(fill="x", pady=(0, 10))
+        btn_frame = ctk.CTkFrame(parent, fg_color="transparent")
+        btn_frame.pack(fill="x", pady=(0, 4))
 
         self.start_btn = ctk.CTkButton(
             btn_frame, text="▶  START", command=self._on_start,
-            font=ctk.CTkFont(size=15, weight="bold"),
+            font=ctk.CTkFont(size=14, weight="bold"),
             fg_color=ACCENT_GREEN, hover_color="#388e3c",
-            text_color="white", height=44, corner_radius=8,
+            text_color="white", height=40, corner_radius=8,
         )
-        self.start_btn.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        self.start_btn.pack(side="left", fill="x", expand=True, padx=(0, 4))
 
         self.stop_btn = ctk.CTkButton(
             btn_frame, text="■  STOP", command=self._on_stop,
-            font=ctk.CTkFont(size=15, weight="bold"),
+            font=ctk.CTkFont(size=14, weight="bold"),
             fg_color=ACCENT_RED, hover_color="#c62828",
-            text_color="white", height=44, corner_radius=8,
+            text_color="white", height=40, corner_radius=8,
             state="disabled",
         )
-        self.stop_btn.pack(side="left", fill="x", expand=True, padx=(5, 0))
+        self.stop_btn.pack(side="left", fill="x", expand=True, padx=(4, 0))
 
-        # ── Log output ──
-        log_frame = ctk.CTkFrame(content, fg_color=BG_CARD, corner_radius=10)
-        log_frame.pack(fill="both", expand=True)
+    # ─── Log panel (right side) ───────────────────────────────────────
 
-        log_header = ctk.CTkFrame(log_frame, fg_color="transparent")
-        log_header.pack(fill="x", padx=14, pady=(8, 0))
+    def _build_log_panel(self):
+        for widget in self._right_frame.winfo_children():
+            widget.destroy()
+        self.log_widgets.clear()
 
-        ctk.CTkLabel(
-            log_header, text="LOG",
-            font=ctk.CTkFont(size=11, weight="bold"),
-            text_color=TEXT_DIM,
-        ).pack(side="left")
+        num_emus = int(self.emu_count_var.get())
 
-        clear_btn = ctk.CTkButton(
-            log_header, text="Clear", command=self._clear_log,
-            font=ctk.CTkFont(size=11),
-            fg_color="transparent", hover_color=BG_MID,
-            text_color=TEXT_DIM, width=50, height=24,
-        )
-        clear_btn.pack(side="right")
+        self._right_frame.rowconfigure(0, weight=1)
+        if num_emus > 1:
+            self._right_frame.rowconfigure(1, weight=1)
+        else:
+            self._right_frame.rowconfigure(1, weight=0)
+        self._right_frame.columnconfigure(0, weight=1)
 
-        self.log_text = ctk.CTkTextbox(
-            log_frame,
-            font=ctk.CTkFont(family="Consolas", size=12),
-            fg_color=BG_DARK, text_color=TEXT_PRIMARY,
-            corner_radius=6, border_width=0,
-            wrap="word",
-        )
-        self.log_text.pack(fill="both", expand=True, padx=10, pady=(4, 10))
+        for i in range(num_emus):
+            log_frame = ctk.CTkFrame(self._right_frame, fg_color=BG_CARD, corner_radius=10)
+            log_frame.grid(row=i, column=0, sticky="nsew",
+                           pady=(0, 4) if i == 0 and num_emus > 1 else (0, 0))
+
+            log_header = ctk.CTkFrame(log_frame, fg_color="transparent")
+            log_header.pack(fill="x", padx=10, pady=(6, 0))
+
+            if num_emus > 1:
+                role = "SELLER" if i == 0 else "BUYER"
+                port = self._device_list[i].split(":")[-1] if i < len(self._device_list) else "?"
+                label_text = f"EMU {i + 1} — {role}  ({port})"
+            else:
+                label_text = "LOG"
+
+            ctk.CTkLabel(
+                log_header, text=label_text,
+                font=ctk.CTkFont(size=10, weight="bold"),
+                text_color=TEXT_DIM,
+            ).pack(side="left")
+
+            ctk.CTkButton(
+                log_header, text="Clear",
+                command=lambda idx=i: self._clear_log(idx),
+                font=ctk.CTkFont(size=10),
+                fg_color="transparent", hover_color=BG_MID,
+                text_color=TEXT_DIM, width=44, height=20,
+            ).pack(side="right")
+
+            textbox = ctk.CTkTextbox(
+                log_frame,
+                font=ctk.CTkFont(family="Consolas", size=11),
+                fg_color=BG_DARK, text_color=TEXT_PRIMARY,
+                corner_radius=6, border_width=0, wrap="word",
+            )
+            textbox.pack(fill="both", expand=True, padx=8, pady=(2, 8))
+
+            self.log_widgets.append((log_frame, textbox))
 
     # ─── Emulator count change ────────────────────────────────────────
 
     def _on_emu_count_change(self, value):
-        """Update the ports label when emulator count changes."""
         n = int(value)
         ports = [d.split(":")[-1] for d in self._device_list[:n]]
         self.emu_ports_label.configure(
             text=f"  Port{'s' if n > 1 else ''}: {', '.join(ports)}"
         )
+        if not self.running:
+            self._build_log_panel()
+
+    # ─── Log helpers ──────────────────────────────────────────────────
+
+    def _log_to(self, emu_idx: int, text: str):
+        if emu_idx < len(self.log_widgets):
+            _, textbox = self.log_widgets[emu_idx]
+            textbox.insert("end", text + "\n")
+            textbox.see("end")
+
+    def _clear_log(self, emu_idx: int = 0):
+        if emu_idx < len(self.log_widgets):
+            _, textbox = self.log_widgets[emu_idx]
+            textbox.delete("1.0", "end")
 
     # ─── Actions ──────────────────────────────────────────────────────
 
@@ -405,6 +462,7 @@ class App(ctk.CTk):
             return
 
         num_emus = int(self.emu_count_var.get())
+        self._build_log_panel()
 
         self.running = True
         self.stats.reset()
@@ -415,26 +473,35 @@ class App(ctk.CTk):
         self.stop_btn.configure(state="normal")
         self.status_label.configure(text="● RUNNING", text_color=ACCENT_GREEN)
 
-        # Build argv from mode selection
+        # Build base argv from mode selection
         mode = self.mode_var.get()
-        argv = ["main.py"]
+        base_argv = ["main.py"]
 
         if mode == "gold-diamond":
             pass
         elif mode == "gold-diamond-buy":
-            argv.append("--buy-first")
+            base_argv.append("--buy-first")
         elif mode == "gold-silver":
-            argv.append("--gold-silver")
+            base_argv.append("--gold-silver")
         elif mode == "gold-silver-buy":
-            argv.extend(["--gold-silver", "--buy-first"])
+            base_argv.extend(["--gold-silver", "--buy-first"])
         elif mode == "all":
-            argv.append("--all")
+            base_argv.append("--all")
         elif mode == "all-buy":
-            argv.extend(["--all", "--buy-first"])
+            base_argv.extend(["--all", "--buy-first"])
         elif mode == "silver":
-            argv.append("--silver")
+            base_argv.append("--silver")
         elif mode == "silver-buy":
-            argv.extend(["--silver", "--buy-first"])
+            base_argv.extend(["--silver", "--buy-first"])
+
+        # Max diamond price
+        max_dp = self.max_diamond_price_var.get().strip().replace(",", "")
+        if max_dp:
+            try:
+                int(max_dp)
+                base_argv.extend(["--max-diamond-price", max_dp])
+            except ValueError:
+                self._log_to(0, "WARNING: Invalid max diamond price — ignoring.")
 
         multi_emu = num_emus > 1
 
@@ -457,23 +524,35 @@ class App(ctk.CTk):
 
         time.sleep = _interruptible_sleep
 
-        # Track active threads
         with self._active_lock:
             self._active_count = num_emus
 
         if multi_emu:
-            self._log(f"Starting {num_emus} emulators ({STAGGER_DELAY}s stagger)...\n")
+            self._log_to(0, "Starting 2 emulators: EMU 1 = Seller, EMU 2 = Buyer")
+            self._log_to(0, "Each cancels its own orders between rounds.\n")
+            self._log_to(1, "Waiting for seller to start first...\n")
         else:
-            self._log(f"Starting: {' '.join(argv)}\n")
+            self._log_to(0, f"Starting: {' '.join(base_argv)}\n")
 
         # Launch emulator threads
         for i in range(num_emus):
             device = self._device_list[i] if i < len(self._device_list) \
                 else f"127.0.0.1:{7555 + i * 2}"
 
+            if multi_emu:
+                # EMU 1 = seller, EMU 2 = buyer
+                # Strip --buy-first since it doesn't apply to dedicated modes
+                emu_argv = [a for a in base_argv if a != "--buy-first"]
+                if i == 0:
+                    emu_argv.append("--sell-only")
+                else:
+                    emu_argv.append("--buy-only")
+            else:
+                emu_argv = list(base_argv)
+
             t = threading.Thread(
                 target=self._run_emulator,
-                args=(argv, i, device, multi_emu),
+                args=(emu_argv, i, device, multi_emu),
                 daemon=True,
             )
             t.start()
@@ -486,36 +565,23 @@ class App(ctk.CTk):
             return
         self.running = False
         self.status_label.configure(text="● STOPPING...", text_color=ACCENT_GOLD)
-        self._log("\n*** STOP requested — all emulators will halt after current action ***\n")
+        for i in range(len(self.log_widgets)):
+            self._log_to(i, "\n*** STOP requested — halting after current action ***")
 
     def _run_emulator(self, argv, emu_index, device, multi_emulator):
-        """
-        Run a single emulator instance in a background thread.
-        Handles stagger delay, thread registration, and cleanup.
-        """
-        num_emus = int(self.emu_count_var.get())
-
-        # Register thread with log prefix
-        if multi_emulator:
-            prefix = f"[EMU {emu_index + 1}] "
-        else:
-            prefix = ""
+        """Run a single emulator instance in a background thread."""
+        prefix = f"[EMU {emu_index + 1}] "
         self._redirector.register(prefix)
 
         try:
-            # Stagger delay (skip for first emulator)
-            if emu_index > 0:
-                delay = emu_index * STAGGER_DELAY
-                print(f"Waiting {delay}s before starting...")
-                end = time.time() + delay
-                while time.time() < end:
-                    if not self.running:
-                        raise KeyboardInterrupt("Stop requested during stagger")
-                    self._original_sleep(min(1.0, max(0, end - time.time())))
+            if "--sell-only" in argv:
+                role = "Seller"
+            elif "--buy-only" in argv:
+                role = "Buyer"
+            else:
+                role = "Combined"
+            print(f"Starting on {device} ({role}): {' '.join(argv)}")
 
-            print(f"Starting on {device}: {' '.join(argv)}")
-
-            # Import and run
             import main as main_module
             main_module.main(
                 args=argv,
@@ -535,18 +601,15 @@ class App(ctk.CTk):
             self._on_emulator_done()
 
     def _on_emulator_done(self):
-        """Called when a single emulator thread finishes."""
         with self._active_lock:
             self._active_count -= 1
             remaining = self._active_count
 
         if remaining <= 0:
-            # All emulators done — restore stdout and sleep
             self._restore_globals()
             self.log_queue.put("__DONE__")
 
     def _restore_globals(self):
-        """Restore sys.stdout and time.sleep after all threads finish."""
         if self._redirector:
             sys.stdout = self._redirector.original
             sys.stderr = self._redirector.original
@@ -556,8 +619,9 @@ class App(ctk.CTk):
             self._original_sleep = None
         self.running = False
 
+    # ─── Log queue polling & routing ──────────────────────────────────
+
     def _poll_log_queue(self):
-        """Poll the log queue and append to the text widget."""
         while True:
             try:
                 msg = self.log_queue.get_nowait()
@@ -566,22 +630,29 @@ class App(ctk.CTk):
                     self.stop_btn.configure(state="disabled")
                     self.status_label.configure(text="● IDLE", text_color=TEXT_DIM)
                     continue
-                self._log(msg)
+
+                emu_idx, clean_msg = self._parse_emu_prefix(msg)
+                self._log_to(emu_idx, clean_msg)
                 self._parse_stats(msg)
             except queue.Empty:
                 break
         self.after(100, self._poll_log_queue)
 
-    def _log(self, text: str):
-        """Append text to the log widget."""
-        self.log_text.insert("end", text + "\n")
-        self.log_text.see("end")
-
-    def _clear_log(self):
-        self.log_text.delete("1.0", "end")
+    def _parse_emu_prefix(self, msg: str) -> tuple[int, str]:
+        if msg.startswith("[EMU "):
+            try:
+                end = msg.index("]")
+                num = int(msg[5:end])
+                clean = msg[end + 2:]
+                idx = num - 1
+                if idx >= len(self.log_widgets):
+                    idx = 0
+                return idx, clean
+            except (ValueError, IndexError):
+                pass
+        return 0, msg
 
     def _parse_stats(self, msg: str):
-        """Parse log messages to update stats (thread-safe)."""
         if "Order placed" in msg or "[9] Order placed" in msg:
             self.stats.increment("cards_bought")
         if "Sold:" in msg or "Sell order placed" in msg:
@@ -592,7 +663,6 @@ class App(ctk.CTk):
             self.stats.increment("errors")
 
     def _update_stats(self):
-        """Periodically update the stats display."""
         if self.stats.start_time:
             self.stat_labels["elapsed"].configure(text=self.stats.elapsed())
         self.stat_labels["bought"].configure(text=str(self.stats.cards_bought))

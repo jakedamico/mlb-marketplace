@@ -9,7 +9,7 @@ Auth: manually update cookies.json with _tsn_session and tsn_token
   - F12 -> Application -> Cookies -> https://mlb26.theshow.com
   - Copy _tsn_session and tsn_token values into cookies.json
 
-Usage:
+Usage (single emulator — full cycle):
   python main.py                    Gold + Diamond flip (sell first)
   python main.py --buy-first        Gold + Diamond flip (buy first)
   python main.py --all              All tiers flip (sell first)
@@ -19,8 +19,15 @@ Usage:
   python main.py --silver           Silver only flip (sell first)
   python main.py --silver --buy-first  Silver only flip (buy first)
 
+Usage (dedicated role — two emulators):
+  python main.py --sell-only        Sell only (continuous)
+  python main.py --buy-only         Buy only (continuous)
+
+  --max-diamond-price N   Cap the maximum buy cost for diamond cards
+
 Multi-emulator (via GUI):
-  Each emulator runs in its own thread with init_emulator() called first.
+  EMU 1 runs --sell-only, EMU 2 runs --buy-only.
+  Each cancels its own order type between rounds.
 """
 
 import json
@@ -129,109 +136,211 @@ def build_uuid_map(all_listings: list[dict]) -> dict:
     return uuid_map
 
 
-# ─── Main ───────────────────────────────────────────────────────────────────
+# ─── Filtering helpers ───────────────────────────────────────────────────
 
-def main(args=None, emu_index: int = 0, multi_emulator: bool = False,
-         device: str = None):
+def _filter_by_max_price(cards: list[dict], max_price: int | None) -> list[dict]:
+    """Remove cards whose buy cost (sell_now + 1) exceeds max_price."""
+    if max_price is None:
+        return cards
+    filtered = [c for c in cards if (c["sell_now"] + 1) <= max_price]
+    if len(filtered) < len(cards):
+        removed = len(cards) - len(filtered)
+        print(f"  Max diamond price filter ({max_price:,}): removed {removed} card(s), {len(filtered)} remaining.")
+    return filtered
+
+
+# ─── Arg parsing helpers ────────────────────────────────────────────────────
+
+def _parse_int_arg(args: list[str], flag: str, default: int) -> int:
+    """Parse an integer flag like --flag N from args."""
+    for i, a in enumerate(args):
+        if a == flag and i + 1 < len(args):
+            try:
+                return int(args[i + 1])
+            except ValueError:
+                pass
+    return default
+
+
+# ─── Fetch market data (shared by all modes) ────────────────────────────────
+
+def _fetch_market_data(include_silver: bool, silver_only: bool,
+                       gold_silver: bool, max_diamond_price: int | None):
     """
-    Main automation loop.
-
-    args:           Command-line args (defaults to sys.argv if None)
-    emu_index:      Emulator instance number (0-based)
-    multi_emulator: True when running multiple emulators concurrently
-    device:         ADB device address (e.g. "127.0.0.1:7555")
+    Fetch listings and build uuid_map. Returns:
+    (all_listings, diamond_market, gold_market, silver_market)
     """
-    if args is None:
-        args = sys.argv
+    all_listings = []
+    diamond_market = []
+    gold_market = []
+    silver_market = []
 
-    include_silver = "--all" in args
-    silver_only = "--silver" in args
-    gold_silver = "--gold-silver" in args
-    buy_first = "--buy-first" in args
+    if not silver_only and not gold_silver:
+        print("\n  === FETCH MARKET DATA (DIAMOND) ===\n")
+        diamond_listings = fetch_all_listings("diamond")
+        diamond_market = analyze_listings(diamond_listings, sort_by="efficiency", rarity="diamond")
+        diamond_market = _filter_by_max_price(diamond_market, max_diamond_price)
+        print(f"  {len(diamond_market)} profitable diamond cards.")
+        all_listings += diamond_listings
 
-    if silver_only:
-        tier_label = "Silver Only"
-    elif gold_silver:
-        tier_label = "Gold + Silver"
-    elif include_silver:
-        tier_label = "All Tiers"
-    else:
-        tier_label = "Gold + Diamond"
-    order_label = "Buy → Sell" if buy_first else "Sell → Buy"
+    if not silver_only:
+        print("\n  === FETCH MARKET DATA (GOLD) ===\n")
+        gold_listings = fetch_all_listings("gold")
+        gold_market = analyze_listings(gold_listings, sort_by="efficiency", rarity="gold")
+        print(f"  {len(gold_market)} profitable gold cards.")
+        all_listings += gold_listings
 
-    # Silver-only and gold+silver modes don't exclude sold cards from buys
-    track_sold = not (silver_only or gold_silver)
+    if include_silver or silver_only or gold_silver:
+        print("\n  === FETCH MARKET DATA (SILVER) ===\n")
+        silver_listings = fetch_all_listings("silver")
+        silver_market = analyze_listings(silver_listings, rarity="silver")
+        print(f"  {len(silver_market)} profitable silver cards.")
+        all_listings += silver_listings
 
-    print("=" * 55)
-    print("  MLB The Show 26 — Marketplace Tool")
-    print("=" * 55)
-    print()
-    print("  Modes:")
-    print("    python main.py                    Gold + Diamond (sell first)")
-    print("    python main.py --buy-first        Gold + Diamond (buy first)")
-    print("    python main.py --all              All tiers (sell first)")
-    print("    python main.py --all --buy-first  All tiers (buy first)")
-    print("    python main.py --gold-silver      Gold + Silver (sell first)")
-    print("    python main.py --gold-silver --buy-first  Gold + Silver (buy first)")
-    print("    python main.py --silver           Silver only (sell first)")
-    print("    python main.py --silver --buy-first  Silver only (buy first)")
-    print()
-    print(f"  Active: {tier_label} — {order_label}")
+    build_uuid_map(all_listings)
+    return all_listings, diamond_market, gold_market, silver_market
 
-    # Initialize emulator for this thread
+
+# ─── Sell-only loop ─────────────────────────────────────────────────────────
+
+def _run_sell_only(args, emu_index, device, include_silver, silver_only,
+                   gold_silver, max_diamond_price):
+    """Dedicated seller: fetch data → cancel sell orders → sell → repeat."""
+    from automation import init_emulator, run_sell_orders
+
+    init_emulator(emu_index, device=device, multi_emulator=False)
+
+    cycle = 1
+    while True:
+        print(f"\n{'#' * 55}")
+        print(f"  SELL CYCLE #{cycle}")
+        print(f"{'#' * 55}")
+
+        _fetch_market_data(include_silver, silver_only, gold_silver,
+                           max_diamond_price)
+
+        print(f"\n  === SELL PHASE ===\n")
+        run_sell_orders(
+            skip_clear=False,
+            include_silver=include_silver,
+            silver_only=silver_only,
+            gold_silver=gold_silver,
+            max_passes=3,
+        )
+
+        cycle += 1
+        print(f"\n  Sell cycle #{cycle - 1} complete. Starting next cycle...")
+
+
+# ─── Buy-only loop ──────────────────────────────────────────────────────────
+
+def _run_buy_only(args, emu_index, device, include_silver, silver_only,
+                  gold_silver, max_diamond_price):
+    """Dedicated buyer: fetch data → cancel buy orders → buy → repeat."""
     from automation import (
-        init_emulator,
-        run_buy_orders, run_sell_orders,
+        init_emulator, run_buy_orders, clear_buy_orders,
+        assume_marketplace_state,
+    )
+
+    init_emulator(emu_index, device=device, multi_emulator=False)
+
+    cycle = 1
+    while True:
+        print(f"\n{'#' * 55}")
+        print(f"  BUY CYCLE #{cycle}")
+        print(f"{'#' * 55}")
+
+        _, diamond_market, gold_market, silver_market = _fetch_market_data(
+            include_silver, silver_only, gold_silver, max_diamond_price)
+
+        print(f"\n  === CLEAR BUY ORDERS ===\n")
+        clear_buy_orders()
+
+        if not diamond_market and not gold_market and not silver_market:
+            print("  No profitable cards. Waiting 60s before retry...")
+            time.sleep(60)
+            cycle += 1
+            continue
+
+        if cycle == 1:
+            if silver_only:
+                assume_marketplace_state("silver")
+            elif gold_silver:
+                assume_marketplace_state("gold")
+            else:
+                assume_marketplace_state("diamond")
+
+        first_buy_done = False
+
+        # Buy diamonds
+        if not silver_only and not gold_silver and diamond_market:
+            print("\n  Refreshing diamond market data...")
+            diamond_listings = fetch_all_listings("diamond")
+            diamond_market = analyze_listings(diamond_listings, sort_by="efficiency", rarity="diamond")
+            diamond_market = _filter_by_max_price(diamond_market, max_diamond_price)
+            print(f"  {len(diamond_market)} profitable diamond cards (fresh).")
+
+            if diamond_market:
+                print(f"\n  === BUY DIAMONDS ===\n")
+                run_buy_orders(diamond_market[:10], skip_clear=True,
+                               min_profit=200, rarity="diamond")
+                first_buy_done = True
+
+        # Buy golds
+        if not silver_only:
+            print("\n  Refreshing gold market data...")
+            gold_listings = fetch_all_listings("gold")
+            gold_market = analyze_listings(gold_listings, sort_by="efficiency", rarity="gold")
+            print(f"  {len(gold_market)} profitable gold cards (fresh).")
+            if gold_market:
+                print(f"\n  === BUY GOLDS ===\n")
+                run_buy_orders(gold_market[:10], skip_clear=True,
+                               min_profit=100, rarity="gold",
+                               skip_navigate=first_buy_done)
+                first_buy_done = True
+
+        # Buy silvers
+        if include_silver or silver_only or gold_silver:
+            print("\n  Refreshing silver market data...")
+            silver_listings = fetch_all_listings("silver")
+            silver_market = analyze_listings(silver_listings, rarity="silver")
+            print(f"  {len(silver_market)} profitable silver cards (fresh).")
+            if silver_market:
+                print(f"\n  === BUY SILVERS ===\n")
+                run_buy_orders(silver_market[:30], skip_clear=True,
+                               min_profit=35, rarity="silver",
+                               skip_navigate=first_buy_done)
+
+        cycle += 1
+        print(f"\n  Buy cycle #{cycle - 1} complete. Starting next cycle...")
+
+
+# ─── Combined loop (single emulator) ────────────────────────────────────────
+
+def _run_combined(args, emu_index, device, include_silver, silver_only,
+                  gold_silver, buy_first, max_diamond_price):
+    """Full sell+buy cycle for single emulator operation."""
+    from automation import (
+        init_emulator, run_buy_orders, run_sell_orders,
         clear_buy_orders, assume_marketplace_state,
     )
 
-    init_emulator(emu_index, device=device, multi_emulator=multi_emulator)
+    track_sold = not (silver_only or gold_silver)
+
+    init_emulator(emu_index, device=device, multi_emulator=False)
 
     cycle = 1
     first_cycle = True
 
     while True:
         print(f"\n{'#' * 55}")
-        print(f"  CYCLE #{cycle} — {tier_label} — {order_label}")
+        print(f"  CYCLE #{cycle}")
         print(f"{'#' * 55}")
 
-        # ── Phase 1: Fetch market data + build uuid_map ──────────────
+        _, diamond_market, gold_market, silver_market = _fetch_market_data(
+            include_silver, silver_only, gold_silver, max_diamond_price)
 
-        all_listings = []
-        diamond_market = []
-        gold_market = []
-        silver_market = []
-
-        if not silver_only and not gold_silver:
-            # Fetch diamond (only for gold+diamond and all-tiers modes)
-            print("\n  === FETCH MARKET DATA (DIAMOND) ===\n")
-            diamond_listings = fetch_all_listings("diamond")
-            diamond_market = analyze_listings(diamond_listings, sort_by="efficiency", rarity="diamond")
-            print(f"  {len(diamond_market)} profitable diamond cards.")
-            all_listings += diamond_listings
-
-        if not silver_only:
-            # Fetch gold (for gold+diamond, all-tiers, and gold+silver modes)
-            print("\n  === FETCH MARKET DATA (GOLD) ===\n")
-            gold_listings = fetch_all_listings("gold")
-            gold_market = analyze_listings(gold_listings, sort_by="efficiency", rarity="gold")
-            print(f"  {len(gold_market)} profitable gold cards.")
-            all_listings += gold_listings
-
-        # Fetch silver if --all, --silver, or --gold-silver
-        silver_listings = []
-        if include_silver or silver_only or gold_silver:
-            print("\n  === FETCH MARKET DATA (SILVER) ===\n")
-            silver_listings = fetch_all_listings("silver")
-            silver_market = analyze_listings(silver_listings, rarity="silver")
-            print(f"  {len(silver_market)} profitable silver cards.")
-            all_listings += silver_listings
-
-        # Build uuid map from all fetched listings
-        build_uuid_map(all_listings)
-
-        # ── Phase 2: Sell (skip on first cycle if buy-first) ─────────
-
+        # Sell phase (skip on first cycle if buy-first)
         sold_names = set()
         if not (first_cycle and buy_first):
             print(f"\n  === SELL PHASE ===\n")
@@ -248,8 +357,7 @@ def main(args=None, emu_index: int = 0, multi_emulator: bool = False,
         else:
             print(f"\n  === SELL PHASE (skipped — starting with buy) ===\n")
 
-        # ── Phase 3: Clear buy orders ────────────────────────────────
-
+        # Clear buy orders
         print(f"\n  === CLEAR BUY ORDERS ===\n")
         clear_buy_orders()
 
@@ -259,27 +367,23 @@ def main(args=None, emu_index: int = 0, multi_emulator: bool = False,
             cycle += 1
             continue
 
-        # ── Phase 4: Buy ─────────────────────────────────────────────
-
         if cycle == 1:
             if silver_only:
-                print("\n  Ensure marketplace is filtered to silver before starting.")
                 assume_marketplace_state("silver")
             elif gold_silver:
-                print("\n  Ensure marketplace is filtered to gold before starting.")
                 assume_marketplace_state("gold")
             else:
-                print("\n  Ensure marketplace is filtered to diamond before starting.")
                 assume_marketplace_state("diamond")
 
         first_buy_done = False
 
-        # Buy diamonds (only for gold+diamond and all-tiers modes)
+        # Buy diamonds
         if not silver_only and not gold_silver and diamond_market:
             if sold_names:
                 print("\n  Refreshing diamond market data...")
                 diamond_listings = fetch_all_listings("diamond")
                 diamond_market = analyze_listings(diamond_listings, sort_by="efficiency", rarity="diamond")
+                diamond_market = _filter_by_max_price(diamond_market, max_diamond_price)
                 print(f"  {len(diamond_market)} profitable diamond cards (fresh).")
 
             if diamond_market:
@@ -288,7 +392,7 @@ def main(args=None, emu_index: int = 0, multi_emulator: bool = False,
                                skip_names=sold_names, min_profit=200, rarity="diamond")
                 first_buy_done = True
 
-        # Buy golds (for gold+diamond, all-tiers, and gold+silver modes)
+        # Buy golds
         if not silver_only:
             print("\n  Refreshing gold market data...")
             gold_listings = fetch_all_listings("gold")
@@ -302,7 +406,7 @@ def main(args=None, emu_index: int = 0, multi_emulator: bool = False,
                                skip_navigate=first_buy_done)
                 first_buy_done = True
 
-        # Buy silvers (if --all, --silver, or --gold-silver)
+        # Buy silvers
         if include_silver or silver_only or gold_silver:
             print("\n  Refreshing silver market data...")
             silver_listings = fetch_all_listings("silver")
@@ -318,6 +422,57 @@ def main(args=None, emu_index: int = 0, multi_emulator: bool = False,
         cycle += 1
         first_cycle = False
         print(f"\n  Cycle #{cycle - 1} complete. Starting next cycle...")
+
+
+# ─── Main ───────────────────────────────────────────────────────────────────
+
+def main(args=None, emu_index: int = 0, multi_emulator: bool = False,
+         device: str = None):
+    if args is None:
+        args = sys.argv
+
+    include_silver = "--all" in args
+    silver_only = "--silver" in args
+    gold_silver = "--gold-silver" in args
+    buy_first = "--buy-first" in args
+    sell_only = "--sell-only" in args
+    buy_only = "--buy-only" in args
+
+    max_diamond_price = _parse_int_arg(args, "--max-diamond-price", None)
+
+    if silver_only:
+        tier_label = "Silver Only"
+    elif gold_silver:
+        tier_label = "Gold + Silver"
+    elif include_silver:
+        tier_label = "All Tiers"
+    else:
+        tier_label = "Gold + Diamond"
+
+    if sell_only:
+        role_label = "SELL ONLY"
+    elif buy_only:
+        role_label = "BUY ONLY"
+    else:
+        role_label = "Buy → Sell" if buy_first else "Sell → Buy"
+
+    print("=" * 55)
+    print("  MLB The Show 26 — Marketplace Tool")
+    print("=" * 55)
+    print()
+    print(f"  Active: {tier_label} — {role_label}")
+    if max_diamond_price is not None:
+        print(f"  Max Diamond Price: {max_diamond_price:,} stubs")
+
+    if sell_only:
+        _run_sell_only(args, emu_index, device, include_silver, silver_only,
+                       gold_silver, max_diamond_price)
+    elif buy_only:
+        _run_buy_only(args, emu_index, device, include_silver, silver_only,
+                      gold_silver, max_diamond_price)
+    else:
+        _run_combined(args, emu_index, device, include_silver, silver_only,
+                      gold_silver, buy_first, max_diamond_price)
 
 
 if __name__ == "__main__":
