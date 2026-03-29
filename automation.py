@@ -1322,7 +1322,21 @@ def run_sell_orders(skip_clear=False, include_silver=False,
                         total_errors += 1
                         break
 
-                    price = buy_now - 1
+                    price = buy_now - sell_attempt  # -1 first copy, -2 second, etc.
+
+                    # Verify we're undercutting the current lowest sell
+                    if price >= buy_now:
+                        print(f"    Price {price:,} is not below current low {buy_now:,}. Stopping sell loop.")
+                        click(BTN_CLOSE_CARD, 1.0)
+                        break
+                    if price <= 0:
+                        print(f"    Price dropped to {price:,}. Stopping sell loop.")
+                        click(BTN_CLOSE_CARD, 1.0)
+                        break
+
+                    undercut = buy_now - price
+                    print(f"    ✓ Undercut check: current low={buy_now:,}, our price={price:,} ({undercut} below)")
+
                     if sell_now is not None:
                         revenue_after_tax = int(price * 0.9)
                         cost = sell_now + 1

@@ -447,8 +447,11 @@ class App(ctk.CTk):
     def _log_to(self, emu_idx: int, text: str):
         if emu_idx < len(self.log_widgets):
             _, textbox = self.log_widgets[emu_idx]
+            # Only auto-scroll if user is already at the bottom
+            at_bottom = textbox.yview()[1] >= 0.95
             textbox.insert("end", text + "\n")
-            textbox.see("end")
+            if at_bottom:
+                textbox.see("end")
 
     def _clear_log(self, emu_idx: int = 0):
         if emu_idx < len(self.log_widgets):
